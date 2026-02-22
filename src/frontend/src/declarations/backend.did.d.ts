@@ -18,11 +18,19 @@ export type ContainerType = { 'flatPack' : null } |
   { 'insulated' : null };
 export interface DailyProductionReport {
   'id' : bigint,
-  'despatched' : bigint,
   'todayProduction' : bigint,
   'totalCompleted' : bigint,
   'date' : string,
   'operationName' : string,
+  'dispatched' : bigint,
+  'inHand' : bigint,
+}
+export interface DailyReportBatchEntry {
+  'todayProduction' : bigint,
+  'totalCompleted' : bigint,
+  'date' : string,
+  'operationName' : string,
+  'dispatched' : bigint,
   'inHand' : bigint,
 }
 export interface DispatchEntry {
@@ -33,6 +41,16 @@ export interface DispatchEntry {
   'deliveryStatus' : string,
   'containerType' : ContainerType,
   'quantity' : bigint,
+}
+export interface EnhancedMasterOrderStatus {
+  'id' : bigint,
+  'totalDispatched' : bigint,
+  'totalManufactured' : bigint,
+  'completionPercentage' : number,
+  'orderName' : string,
+  'remainingToProduce' : bigint,
+  'totalOrderQuantity' : bigint,
+  'finishedStock' : bigint,
 }
 export interface HistoricalOpeningBalance {
   'id' : bigint,
@@ -83,6 +101,10 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'batchUpdateDailyProductionReport' : ActorMethod<
+    [string, Array<DailyReportBatchEntry>],
+    undefined
+  >,
   'createDailyProductionReport' : ActorMethod<
     [string, string, bigint, bigint, bigint, bigint],
     bigint
@@ -122,6 +144,7 @@ export interface _SERVICE {
     Array<DailyProductionReport>
   >,
   'getDispatchEntriesByDate' : ActorMethod<[Time, Time], Array<DispatchEntry>>,
+  'getEnhancedMasterOrderStatus' : ActorMethod<[], EnhancedMasterOrderStatus>,
   'getFilteredProductionEntries' : ActorMethod<
     [[] | [ContainerType], [] | [ContainerStatus]],
     Array<ProductionEntry>

@@ -5,7 +5,7 @@ import { TrendingUp } from 'lucide-react';
 import { useProductionTrendData, useHistoricalOpeningBalance } from '../hooks/useQueries';
 
 export default function ProductionTrendChart() {
-  const { data, isLoading, isError } = useProductionTrendData();
+  const { data, isLoading, isError, isRefetching } = useProductionTrendData();
   const { data: openingBalance } = useHistoricalOpeningBalance();
 
   if (isLoading) {
@@ -81,9 +81,14 @@ export default function ProductionTrendChart() {
 
   return (
     <div className="glass-card metallic-border rounded-lg p-6">
-      <div className="flex items-center gap-2 mb-2">
-        <TrendingUp className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold">Production Trend</h3>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Production Trend</h3>
+        </div>
+        {isRefetching && (
+          <span className="text-xs text-muted-foreground animate-pulse">Updating...</span>
+        )}
       </div>
       <p className="text-sm text-muted-foreground mb-4">
         Daily total production output across all operations

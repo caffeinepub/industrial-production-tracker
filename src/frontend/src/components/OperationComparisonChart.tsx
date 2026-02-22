@@ -5,7 +5,7 @@ import { BarChart3 } from 'lucide-react';
 import { useOperationComparisonData } from '../hooks/useQueries';
 
 export default function OperationComparisonChart() {
-  const { data, isLoading, isError } = useOperationComparisonData();
+  const { data, isLoading, isError, isRefetching } = useOperationComparisonData();
 
   if (isLoading) {
     return (
@@ -57,12 +57,17 @@ export default function OperationComparisonChart() {
 
   return (
     <div className="glass-card metallic-border rounded-lg p-6">
-      <div className="flex items-center gap-2 mb-2">
-        <BarChart3 className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold">Operation-wise Comparison</h3>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Operation-wise Comparison</h3>
+        </div>
+        {isRefetching && (
+          <span className="text-xs text-muted-foreground animate-pulse">Updating...</span>
+        )}
       </div>
       <p className="text-sm text-muted-foreground mb-4">
-        Total production output by operation
+        Total completed units by operation
       </p>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 60 }}>
@@ -89,7 +94,7 @@ export default function OperationComparisonChart() {
             className="text-xs"
             tick={{ fill: 'oklch(0.65 0.01 264)' }}
             stroke="oklch(0.30 0.02 264)"
-            label={{ value: 'Production Quantity', angle: -90, position: 'insideLeft', style: { fill: 'oklch(0.65 0.01 264)' } }}
+            label={{ value: 'Total Completed', angle: -90, position: 'insideLeft', style: { fill: 'oklch(0.65 0.01 264)' } }}
           />
           <Tooltip
             contentStyle={{
@@ -103,7 +108,7 @@ export default function OperationComparisonChart() {
           <Legend />
           <Bar
             dataKey="production"
-            name="Production Quantity"
+            name="Total Completed"
             radius={[8, 8, 0, 0]}
             isAnimationActive={true}
             animationDuration={1000}

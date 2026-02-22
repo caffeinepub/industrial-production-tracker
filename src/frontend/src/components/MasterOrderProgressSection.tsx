@@ -1,11 +1,11 @@
 import { useGetMasterOrderStatus } from '../hooks/useQueries';
 import SummaryCard from './SummaryCard';
 import CircularProgress from './CircularProgress';
-import { Package, Truck, Factory, CheckCircle2 } from 'lucide-react';
+import { Package, Truck, Factory, CheckCircle2, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MasterOrderProgressSection() {
-  const { data: masterOrder, isLoading, error } = useGetMasterOrderStatus();
+  const { data: masterOrder, isLoading, error, isRefetching } = useGetMasterOrderStatus();
 
   if (isLoading) {
     return (
@@ -48,12 +48,20 @@ export default function MasterOrderProgressSection() {
             Total Order: <span className="font-semibold text-foreground">{totalOrderQuantity} Units</span>
           </p>
         </div>
-        {finishedStock === 0 && (
-          <Badge className="bg-success/20 text-success border-success/30 px-4 py-2 text-sm font-medium">
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            No Pending Dispatch
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {isRefetching && (
+            <Badge variant="outline" className="animate-pulse">
+              <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+              Updating...
+            </Badge>
+          )}
+          {finishedStock === 0 && totalManufactured > 0 && (
+            <Badge className="bg-success/20 text-success border-success/30 px-4 py-2 text-sm font-medium">
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              No Pending Dispatch
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Main Content Grid */}

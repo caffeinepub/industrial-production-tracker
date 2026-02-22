@@ -89,23 +89,16 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface ProductionEntry {
-    status: ContainerStatus;
-    modifiedAt: Time;
-    createdAt: Time;
-    totalQty: bigint;
-    entryId: bigint;
-    containerType: ContainerType;
-    statusTime: Time;
-    shiftDetail: Shift;
-}
 export type Time = bigint;
-export interface MasterOrderStatus {
+export interface EnhancedMasterOrderStatus {
     id: bigint;
     totalDispatched: bigint;
     totalManufactured: bigint;
+    completionPercentage: number;
     orderName: string;
+    remainingToProduce: bigint;
     totalOrderQuantity: bigint;
+    finishedStock: bigint;
 }
 export interface Shift {
     name: string;
@@ -140,18 +133,43 @@ export interface DispatchEntry {
     containerType: ContainerType;
     quantity: bigint;
 }
-export interface UserProfile {
-    name: string;
-    department: string;
+export interface ProductionEntry {
+    status: ContainerStatus;
+    modifiedAt: Time;
+    createdAt: Time;
+    totalQty: bigint;
+    entryId: bigint;
+    containerType: ContainerType;
+    statusTime: Time;
+    shiftDetail: Shift;
 }
-export interface DailyProductionReport {
-    id: bigint;
-    despatched: bigint;
+export interface DailyReportBatchEntry {
     todayProduction: bigint;
     totalCompleted: bigint;
     date: string;
     operationName: string;
+    dispatched: bigint;
     inHand: bigint;
+}
+export interface MasterOrderStatus {
+    id: bigint;
+    totalDispatched: bigint;
+    totalManufactured: bigint;
+    orderName: string;
+    totalOrderQuantity: bigint;
+}
+export interface DailyProductionReport {
+    id: bigint;
+    todayProduction: bigint;
+    totalCompleted: bigint;
+    date: string;
+    operationName: string;
+    dispatched: bigint;
+    inHand: bigint;
+}
+export interface UserProfile {
+    name: string;
+    department: string;
 }
 export enum ContainerStatus {
     readyForDispatch = "readyForDispatch",
@@ -171,7 +189,8 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    createDailyProductionReport(date: string, operationName: string, todayProduction: bigint, totalCompleted: bigint, despatched: bigint, inHand: bigint): Promise<bigint>;
+    batchUpdateDailyProductionReport(date: string, operations: Array<DailyReportBatchEntry>): Promise<void>;
+    createDailyProductionReport(date: string, operationName: string, todayProduction: bigint, totalCompleted: bigint, dispatched: bigint, inHand: bigint): Promise<bigint>;
     createDispatchEntry(containerType: ContainerType, quantity: bigint, dispatchDate: Time, destination: string, deliveryStatus: string): Promise<bigint>;
     createHistoricalOpeningBalance(openingDate: string, manufacturedBeforeSystem: bigint, dispatchedBeforeSystem: bigint, manufacturingStartDate: string, systemGoLiveDate: string): Promise<void>;
     createProductionEntry(containerType: ContainerType, shiftDetail: Shift, status: ContainerStatus, totalQty: bigint): Promise<bigint>;
@@ -183,6 +202,7 @@ export interface backendInterface {
     getDailyProductionReportsByDateRange(startDate: string, endDate: string): Promise<Array<DailyProductionReport>>;
     getDailyProductionReportsByOperation(operationName: string): Promise<Array<DailyProductionReport>>;
     getDispatchEntriesByDate(_rangeStart: Time, _rangeEnd: Time): Promise<Array<DispatchEntry>>;
+    getEnhancedMasterOrderStatus(): Promise<EnhancedMasterOrderStatus>;
     getFilteredProductionEntries(containerType: ContainerType | null, status: ContainerStatus | null): Promise<Array<ProductionEntry>>;
     getHistoricalOpeningBalance(): Promise<HistoricalOpeningBalance | null>;
     getMasterOrderStatus(): Promise<MasterOrderStatus>;
@@ -192,9 +212,9 @@ export interface backendInterface {
     initializeProductionReports(): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitOrUpdateDailyReport(date: string, operationName: string, todayProduction: bigint, totalCompleted: bigint, despatched: bigint, inHand: bigint): Promise<bigint>;
-    updateDailyProductionReport(_id: bigint, _todayProduction: bigint, _totalCompleted: bigint, _despatched: bigint, _inHand: bigint): Promise<void>;
-    updateDailyProductionReportById(reportId: bigint, todayProduction: bigint, totalCompleted: bigint, despatched: bigint, inHand: bigint): Promise<void>;
+    submitOrUpdateDailyReport(date: string, operationName: string, todayProduction: bigint, totalCompleted: bigint, dispatched: bigint, inHand: bigint): Promise<bigint>;
+    updateDailyProductionReport(_id: bigint, _todayProduction: bigint, _totalCompleted: bigint, _dispatched: bigint, _inHand: bigint): Promise<void>;
+    updateDailyProductionReportById(reportId: bigint, todayProduction: bigint, totalCompleted: bigint, dispatched: bigint, inHand: bigint): Promise<void>;
     updateDispatchStatus(dispatchId: bigint, newStatus: string): Promise<void>;
     updateMasterOrderStatus(totalManufactured: bigint, totalDispatched: bigint): Promise<void>;
     updateProductionStatus(entryId: bigint, newStatus: ContainerStatus): Promise<void>;
@@ -227,6 +247,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async batchUpdateDailyProductionReport(arg0: string, arg1: Array<DailyReportBatchEntry>): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.batchUpdateDailyProductionReport(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.batchUpdateDailyProductionReport(arg0, arg1);
             return result;
         }
     }
@@ -396,6 +430,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getDispatchEntriesByDate(arg0, arg1);
             return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getEnhancedMasterOrderStatus(): Promise<EnhancedMasterOrderStatus> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getEnhancedMasterOrderStatus();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getEnhancedMasterOrderStatus();
+            return result;
         }
     }
     async getFilteredProductionEntries(arg0: ContainerType | null, arg1: ContainerStatus | null): Promise<Array<ProductionEntry>> {

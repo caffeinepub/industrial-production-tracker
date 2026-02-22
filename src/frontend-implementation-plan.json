@@ -1,165 +1,43 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Frontend Implementation for Historical Opening Balance Feature",
+  "title": "Insert historical production data for date 2026-02-21 and update master order status",
   "requirements": [
     {
-      "id": "REQ-109",
-      "summary": "Create React Query hook to fetch historical opening balance data",
+      "id": "REQ-130",
+      "summary": "Ensure ProductionDashboardLivePage automatically refreshes and displays updated production data for date 2026-02-21",
       "acceptanceCriteria": [
-        "Hook fetches opening balance data using React Query",
-        "Hook returns loading, error, and data states",
-        "Hook is properly typed with TypeScript"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add useHistoricalOpeningBalance query hook that calls backend getHistoricalOpeningBalance() and returns HistoricalOpeningBalance | null with standard React Query loading/error states"
-        }
-      ]
-    },
-    {
-      "id": "REQ-110",
-      "summary": "Create React Query mutation hook for creating historical opening balance",
-      "acceptanceCriteria": [
-        "Mutation hook calls backend createHistoricalOpeningBalance",
-        "Hook invalidates master order and production queries on success",
-        "Success/error toast notifications are displayed",
-        "Authorization errors show user-friendly messages"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add useCreateHistoricalOpeningBalance mutation hook that accepts opening balance parameters, calls backend createHistoricalOpeningBalance(), invalidates queries for masterOrderStatus, dailyProductionReports, and historicalOpeningBalance, displays toast notifications for success/error, and handles authorization errors with user-friendly messages"
-        }
-      ]
-    },
-    {
-      "id": "REQ-111",
-      "summary": "Create admin form component for historical opening balance entry creation",
-      "acceptanceCriteria": [
-        "Form displays all opening balance fields as read-only with fixed values",
-        "Form is only visible to Admin users",
-        "Form is hidden if opening balance already exists",
-        "Warning message about non-editable entry is prominently displayed",
-        "Create button is disabled during submission",
-        "Success toast confirms entry creation"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/HistoricalOpeningBalanceForm.tsx",
-          "operation": "create",
-          "description": "Create form component for Admin users with read-only display fields showing Manufacturing Start Date (25.08.2025), System Go-Live Date (22.02.2026), Opening Date (20.02.2026), Manufactured Before System (344), Dispatched Before System (344). Include prominent warning 'This entry cannot be edited after saving'. Conditionally render form only when opening balance does not exist. Add Create Opening Balance button that calls useCreateHistoricalOpeningBalance mutation with fixed values. Button disabled during submission. Uses glass-card styling consistent with existing components."
-        }
-      ]
-    },
-    {
-      "id": "REQ-112",
-      "summary": "Create read-only display component for existing historical opening balance",
-      "acceptanceCriteria": [
-        "Component displays opening balance data in premium card UI",
-        "Locked badge clearly indicates entry cannot be edited",
-        "Component uses existing glass-effect card styling",
-        "Component renders only when opening balance data exists"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/HistoricalOpeningBalanceDisplay.tsx",
-          "operation": "create",
-          "description": "Create read-only display component that shows existing opening balance entry in premium glass-effect card format. Display all fields: Manufacturing Start Date, System Go-Live Date, Opening Date, Manufactured Before System, Dispatched Before System. Include locked badge icon with text 'Historical Opening Balance - Locked'. Use styling consistent with existing dashboard cards (glass morphism, premium dark theme). Render only when opening balance data exists."
-        }
-      ]
-    },
-    {
-      "id": "REQ-113",
-      "summary": "Create container page for historical opening balance management",
-      "acceptanceCriteria": [
-        "Page displays form for Admin users when opening balance does not exist",
-        "Page displays read-only view when opening balance exists",
-        "Page shows loading skeleton during data fetch",
-        "Page handles errors gracefully with error messages"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/HistoricalOpeningBalancePage.tsx",
-          "operation": "create",
-          "description": "Create container page with page title 'Historical Opening Balance'. Use useHistoricalOpeningBalance hook to fetch data and useGetCallerUserRole to check admin status. Conditionally render HistoricalOpeningBalanceForm when opening balance is null and user is Admin, or HistoricalOpeningBalanceDisplay when opening balance exists. Include loading skeleton during fetch and error message handling for failed queries."
-        }
-      ]
-    },
-    {
-      "id": "REQ-114",
-      "summary": "Add navigation link for Historical Opening Balance page in sidebar",
-      "acceptanceCriteria": [
-        "Navigation link appears in sidebar menu",
-        "Link is positioned between Production History and Monthly Target",
-        "Link uses appropriate icon consistent with sidebar design",
-        "Link navigates to HistoricalOpeningBalancePage"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Layout.tsx",
-          "operation": "modify",
-          "description": "Add navigation link for Opening Balance page to sidebar navigation array. Position link between Production History (/production-history) and Monthly Target (/reports). Use Database or Archive icon from lucide-react. Link routes to /opening-balance path with label 'Opening Balance'."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add route configuration for /opening-balance path that renders HistoricalOpeningBalancePage component. Position route alongside existing dashboard, production entry, history, dispatch, workload, and reports routes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-115",
-      "summary": "Update production trend chart to include opening balance baseline",
-      "acceptanceCriteria": [
-        "Opening balance appears as first data point on trend chart",
-        "Chart x-axis shows opening date (20.02.2026)",
-        "Chart y-axis shows manufactured total (344) for opening balance",
-        "Trend line smoothly continues from opening balance to daily production data",
-        "Chart legend or tooltip clearly indicates opening balance point"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProductionTrendChart.tsx",
-          "operation": "modify",
-          "description": "Modify ProductionTrendChart to fetch historical opening balance using useHistoricalOpeningBalance hook. Prepend opening balance as first data point with date (20.02.2026) and manufactured value (344) to the production trend line data array. Ensure chart x-axis displays opening date and y-axis shows manufactured quantity. Add visual distinction or tooltip indicating this is the historical baseline. Maintain smooth line continuity from opening balance to subsequent daily production data points."
-        }
-      ]
-    },
-    {
-      "id": "REQ-116",
-      "summary": "Display opening balance informational badge on dashboard",
-      "acceptanceCriteria": [
-        "Badge displays opening balance information when it exists",
-        "Badge is positioned prominently at top of dashboard",
-        "Badge styling matches premium dark theme aesthetic",
-        "Badge clearly communicates baseline production context"
+        "Dashboard automatically refreshes after batch data insertion",
+        "Summary cards display updated today's production totals for 2026-02-21",
+        "Monthly production summaries reflect the new data",
+        "Production trend chart includes the new data point for 2026-02-21",
+        "Master order progress section shows total_manufactured=345 and total_dispatched=344",
+        "All calculated metrics (remaining, finished stock, completion %) are correct"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/ProductionDashboardLivePage.tsx",
           "operation": "modify",
-          "description": "Add useHistoricalOpeningBalance hook to fetch opening balance data. Display informational badge at top of page (above monthly summary cards) when opening balance exists, showing 'Baseline: 344 units manufactured before system go-live (20.02.2026)'. Use subtle badge styling consistent with premium dark theme (glass-effect, metallic borders). Position badge prominently to provide context for dashboard totals."
+          "description": "Verify that the page correctly fetches and displays production data for the selected date (2026-02-21). Ensure that summary cards aggregate today's production totals from all operations, monthly summaries reflect the new data point, and the production trend chart includes the date 2026-02-21. The master order progress section should display total_manufactured=345 and total_dispatched=344 with correctly calculated derived metrics (remaining=255, finished_stock=1, completion_percentage=57.5). Add automatic query invalidation or refetch logic if needed to ensure the dashboard updates after batch data insertion completes."
         }
       ]
     },
     {
-      "id": "REQ-117",
-      "summary": "Ensure master order summary cards display totals including opening balance",
+      "id": "REQ-131",
+      "summary": "Ensure LiveProductionTable displays all 17 operations with production data for date 2026-02-21",
       "acceptanceCriteria": [
-        "Total Manufactured card includes opening balance in count",
-        "Total Dispatched card includes opening balance in count",
-        "No frontend calculation required - relies on backend totals",
-        "Cards display correct totals reflecting opening balance"
+        "Table displays all 17 operations for date 2026-02-21",
+        "Each operation shows correct today_production value",
+        "Each operation shows correct total_completed value",
+        "Each operation shows correct dispatched value",
+        "in_hand is correctly calculated and displayed as (total_completed - dispatched)",
+        "Table loads without errors when 2026-02-21 is selected"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/MasterOrderProgressSection.tsx",
+          "path": "frontend/src/components/LiveProductionTable.tsx",
           "operation": "modify",
-          "description": "Verify MasterOrderProgressSection component displays Total Manufactured and Total Dispatched values from backend getMasterOrderStatus query without frontend modifications. Backend query already includes opening balance in totals. Add comment confirming the component relies on backend-calculated totals that incorporate the historical opening balance (344 manufactured, 344 dispatched)."
+          "description": "Verify that the table correctly displays all 17 operations (Boxing, Welding/Finishing, Rear Wall, Front Wall, Side Wall, Roof, Rear Door, Blasting & Primer, Final Paint, Gasket, DLM, Plywood, Floor Screw, Decal, Data Plate, Sikha, Black Paint) when date 2026-02-21 is selected. Ensure each row shows the correct today_production, total_completed, dispatched values, and that in_hand is correctly calculated as (total_completed - dispatched). Add error handling to ensure the table loads without errors when the historical date is selected."
         }
       ]
     }

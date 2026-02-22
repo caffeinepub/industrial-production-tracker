@@ -56,7 +56,7 @@ export default function ProductionHistoryDetailTable({ startDate, endDate, isAdm
                   <TableHead>Operation</TableHead>
                   <TableHead className="text-right">Today's Production</TableHead>
                   <TableHead className="text-right">Total Completed</TableHead>
-                  <TableHead className="text-right">Despatched</TableHead>
+                  <TableHead className="text-right">Dispatched</TableHead>
                   <TableHead className="text-right">In Hand</TableHead>
                   {isAdmin && <TableHead className="text-center">Actions</TableHead>}
                 </TableRow>
@@ -68,7 +68,7 @@ export default function ProductionHistoryDetailTable({ startDate, endDate, isAdm
                     <TableCell>{report.operationName}</TableCell>
                     <TableCell className="text-right">{report.todayProduction.toString()}</TableCell>
                     <TableCell className="text-right">{report.totalCompleted.toString()}</TableCell>
-                    <TableCell className="text-right">{report.despatched.toString()}</TableCell>
+                    <TableCell className="text-right">{report.dispatched.toString()}</TableCell>
                     <TableCell className="text-right font-semibold">{report.inHand.toString()}</TableCell>
                     {isAdmin && (
                       <TableCell className="text-center">

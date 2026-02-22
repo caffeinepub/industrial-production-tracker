@@ -1,16 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Implement a historical opening balance feature to track pre-system production baseline (344 units manufactured and dispatched before system go-live on 20.02.2026).
+**Goal:** Insert historical production data for date 2026-02-21 and update master order status to reflect current manufacturing progress.
 
 **Planned changes:**
-- Add HistoricalOpeningBalance data type with fixed values: opening date (20.02.2026), manufactured before system (344), dispatched before system (344), manufacturing start date (25.08.2025), system go-live date (22.02.2026)
-- Create backend mutation for admin-only creation of the single immutable opening balance entry
-- Update dashboard totals (Master Order Status) to include opening balance manufactured and dispatched counts
-- Exclude opening balance from monthly target calculations and daily average production metrics
-- Add HistoricalOpeningBalancePage with admin form (when entry doesn't exist) and read-only display (when entry exists)
-- Update ProductionTrendChart to show opening balance as the starting baseline point on the trend line
-- Add navigation link "Opening Balance" in sidebar between Production History and Monthly Target
-- Display informational baseline badge on ProductionDashboardLivePage showing opening balance context
+- Create backend mutation function `batchUpdateDailyProductionReport` that accepts date and array of operation data, auto-calculates in_hand values, and performs INSERT or UPDATE based on record existence
+- Execute batch insertion for date 2026-02-21 with all 17 operations using specified production data (Boxing: today=5/total=400/dispatch=344, Welding/Finishing: today=4/total=399/dispatch=344, etc.)
+- Update Master_Order_Status entry with total_order_quantity=600, total_manufactured=345, total_dispatched=344
+- Ensure ProductionDashboardLivePage automatically refreshes and displays updated production data for 2026-02-21
+- Ensure LiveProductionTable correctly displays all 17 operations with production data when date 2026-02-21 is selected
 
-**User-visible outcome:** Admins can create a one-time historical opening balance entry that establishes the production baseline before system implementation. Dashboard totals and trend charts automatically include this baseline, while monthly targets remain unaffected. The entry is locked and cannot be edited after creation.
+**User-visible outcome:** Administrators can view historical production data for date 2026-02-21 in the dashboard, with all 17 operations showing correct today's production, totals, dispatch, and in-hand values. Master order progress metrics display total_manufactured=345 and total_dispatched=344 with accurate calculated metrics (remaining=255, finished_stock=1, completion=57.5%).

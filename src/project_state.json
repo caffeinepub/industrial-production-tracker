@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 29,
+  "projectStateVersion": 35,
   "summary": "Premium industrial SaaS production tracking web application with dark theme UI, animated dashboard, collapsible sidebar navigation, modern visual design for shipping container manufacturing with role-based access control, and Master Order Progress tracking system",
   "architectural_notes": [
     "Mobile-first responsive design for smartphone data entry",
@@ -588,6 +588,38 @@
         "REQ-117"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-ensure-production-dashboard-live-page-automatically-refreshes-and-displays-the-updated-production-data-for-date-21-02-2026-after-the-batch-insertion-is-complete-showing-the-new-today-s-production-totals-monthly-summaries-and-master-order-progress-metrics",
+      "title": "Ensure Production Dashboard Live page automatically refreshes and displays the updated production data for date 21.02.2026 after the batch insertion is complete, showing the new today's production totals, monthly summaries, and master order progress metrics",
+      "reqIds": [
+        "REQ-121"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-liveproductiontable-component-at-frontend-src-components-liveproductiontable-tsx-correctly-displays-all-production-data-for-the-selected-date-2026-02-21-showing-all-17-operations-with-their-respective-today-production-total-completed-dispatched-and-auto-calculated-in-hand-values-in-the-table-rows",
+      "title": "Ensure LiveProductionTable component at frontend/src/components/LiveProductionTable.tsx correctly displays all production data for the selected date 2026-02-21, showing all 17 operations with their respective today_production, total_completed, dispatched, and auto-calculated in_hand values in the table rows",
+      "reqIds": [
+        "REQ-126"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-productiondashboardlivepage-at-frontend-src-pages-productiondashboardlivepage-tsx-automatically-refreshes-and-displays-the-updated-production-data-for-date-2026-02-21-after-batch-insertion-completes-showing-new-today-s-production-totals-in-summary-cards-updated-monthly-summaries-refreshed-production-trend-chart-including-the-new-date-data-point-and-updated-master-order-progress-metrics-with-total-manufactured-345-and-total-dispatched-344",
+      "title": "Ensure ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx automatically refreshes and displays the updated production data for date 2026-02-21 after batch insertion completes, showing new today's production totals in summary cards, updated monthly summaries, refreshed production trend chart including the new date data point, and updated master order progress metrics with total_manufactured=345 and total_dispatched=344",
+      "reqIds": [
+        "REQ-130"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-liveproductiontable-component-at-frontend-src-components-liveproductiontable-tsx-correctly-displays-all-17-operations-with-production-data-when-date-2026-02-21-is-selected-showing-each-operation-s-today-production-total-completed-dispatched-and-auto-calculated-in-hand-values-in-table-rows",
+      "title": "Ensure LiveProductionTable component at frontend/src/components/LiveProductionTable.tsx correctly displays all 17 operations with production data when date 2026-02-21 is selected, showing each operation's today_production, total_completed, dispatched, and auto-calculated in_hand values in table rows",
+      "reqIds": [
+        "REQ-131"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1110,6 +1142,86 @@
       "summary": "Update backend getMasterOrderStatus query to include the historical opening balance manufactured_before_system (344) in the base total_manufactured count and dispatched_before_system (344) in the base total_dispatched count, ensuring dashboard totals reflect pre-system production",
       "reqIds": [
         "REQ-108"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-99",
+      "summary": "Create or update Daily_Production_Report entries for date 21.02.2026 with the following data for all 17 operations: Boxing (today=5, total=400, dispatch=344), Welding/Finishing (today=4, total=399, dispatch=344), Rear Wall (today=2, total=403, dispatch=344), Front Wall (today=5, total=422, dispatch=344), Side Wall (today=8, total=439, dispatch=344), Roof (today=0, total=427, dispatch=344), Rear Door (today=10, total=420, dispatch=344), Blasting & Primer (today=4, total=367, dispatch=344), Final Paint (today=3, total=359, dispatch=344), Gasket (today=5, total=352, dispatch=344), DLM (today=5, total=352, dispatch=344), Plywood (today=5, total=351, dispatch=344), Floor Screw (today=5, total=350, dispatch=344), Decal (today=5, total=352, dispatch=344), Data Plate (today=5, total=352, dispatch=344), Sikha (today=4, total=346, dispatch=344), Black Paint (today=1, total=345, dispatch=344)",
+      "reqIds": [
+        "REQ-118"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-100",
+      "summary": "Update Master_Order_Status entry with the following values: total_order_quantity=600, total_manufactured=345, total_dispatched=344, ensuring auto-calculated fields show remaining_to_produce=255, finished_stock=1, completion_percentage=57.5",
+      "reqIds": [
+        "REQ-119"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-101",
+      "summary": "Implement a backend batch data insertion utility function or mutation that accepts an array of Daily_Production_Report entries and processes them in a single transaction, ensuring atomic creation/update of all 17 operations for the specified date 21.02.2026",
+      "reqIds": [
+        "REQ-120"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-102",
+      "summary": "Create backend mutation function batchUpdateDailyProductionReport in backend/main.mo that accepts date (Text in YYYY-MM-DD format '2026-02-21'), an array of operation data objects containing operation_name (Text), today_production (Nat), total_completed (Nat), and dispatched (Nat), auto-calculates in_hand (total_completed - dispatched) for each entry, checks if a Daily_Production_Report record exists for the given date + operation_name combination, performs UPDATE if record exists or INSERT if not exists, and includes requireAdmin() authorization check",
+      "reqIds": [
+        "REQ-122"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-103",
+      "summary": "Execute batch insertion for date 2026-02-21 with all 17 operations using the following exact data: Boxing (today_production=5, total_completed=400, dispatched=344), Welding/Finishing (today_production=4, total_completed=399, dispatched=344), Rear Wall (today_production=2, total_completed=403, dispatched=344), Front Wall (today_production=5, total_completed=422, dispatched=344), Side Wall (today_production=8, total_completed=439, dispatched=344), Roof (today_production=0, total_completed=427, dispatched=344), Rear Door (today_production=10, total_completed=420, dispatched=344), Blasting & Primer (today_production=4, total_completed=367, dispatched=344), Final Paint (today_production=3, total_completed=359, dispatched=344), Gasket (today_production=5, total_completed=352, dispatched=344), DLM (today_production=5, total_completed=352, dispatched=344), Plywood (today_production=5, total_completed=351, dispatched=344), Floor Screw (today_production=5, total_completed=350, dispatched=344), Decal (today_production=5, total_completed=352, dispatched=344), Data Plate (today_production=5, total_completed=352, dispatched=344), Sikha (today_production=4, total_completed=346, dispatched=344), Black Paint (today_production=1, total_completed=345, dispatched=344), storing date as '2026-02-21' and auto-calculating in_hand for each operation",
+      "reqIds": [
+        "REQ-123"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-104",
+      "summary": "Update Master_Order_Status entry after the batch data insertion with the following values: total_order_quantity=600, total_manufactured=345, total_dispatched=344, ensuring the backend auto-calculation shows remaining_to_produce=255 (600-345), finished_stock=1 (345-344), and completion_percentage=57.5 ((345/600)*100)",
+      "reqIds": [
+        "REQ-124"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-105",
+      "summary": "Ensure Production Dashboard Live page at frontend/src/pages/ProductionDashboardLivePage.tsx automatically fetches and displays the updated production data for date 2026-02-21 after the batch insertion, showing the new today's production totals in summary cards, updated monthly summaries, refreshed production trend chart including the new date data point, and updated master order progress metrics with the new total_manufactured (345) and total_dispatched (344) values",
+      "reqIds": [
+        "REQ-125"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-106",
+      "summary": "Create backend mutation function batchUpdateDailyProductionReport in backend/main.mo that accepts date (Text in YYYY-MM-DD format), an array of operation data objects containing operation_name, today_production, total_completed, and dispatched, auto-calculates in_hand (total_completed - dispatched) for each entry, checks if a Daily_Production_Report record exists for the given date + operation_name combination, performs UPDATE if record exists or INSERT if not exists, includes requireAdmin() authorization check, and returns a success confirmation with the count of entries processed",
+      "reqIds": [
+        "REQ-127"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-107",
+      "summary": "Execute batch insertion for date 2026-02-21 with all 17 operations using the exact production data: Boxing (today=5, total=400, dispatch=344), Welding/Finishing (today=4, total=399, dispatch=344), Rear Wall (today=2, total=403, dispatch=344), Front Wall (today=5, total=422, dispatch=344), Side Wall (today=8, total=439, dispatch=344), Roof (today=0, total=427, dispatch=344), Rear Door (today=10, total=420, dispatch=344), Blasting & Primer (today=4, total=367, dispatch=344), Final Paint (today=3, total=359, dispatch=344), Gasket (today=5, total=352, dispatch=344), DLM (today=5, total=352, dispatch=344), Plywood (today=5, total=351, dispatch=344), Floor Screw (today=5, total=350, dispatch=344), Decal (today=5, total=352, dispatch=344), Data Plate (today=5, total=352, dispatch=344), Sikha (today=4, total=346, dispatch=344), Black Paint (today=1, total=345, dispatch=344), storing date as '2026-02-21' in YYYY-MM-DD format with auto-calculated in_hand values",
+      "reqIds": [
+        "REQ-128"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-108",
+      "summary": "Update Master_Order_Status entry after batch data insertion with values: total_order_quantity=600, total_manufactured=345, total_dispatched=344, ensuring backend calculation shows remaining_to_produce=255 (600-345), finished_stock=1 (345-344), and completion_percentage=57.5 ((345/600)*100)",
+      "reqIds": [
+        "REQ-129"
       ],
       "status": "pending"
     }

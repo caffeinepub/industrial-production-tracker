@@ -29,7 +29,7 @@ export default function EditProductionReportDialog({
 }: EditProductionReportDialogProps) {
   const [todayProduction, setTodayProduction] = useState('0');
   const [totalCompleted, setTotalCompleted] = useState('0');
-  const [despatched, setDespatched] = useState('0');
+  const [dispatched, setDispatched] = useState('0');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const updateMutation = useUpdateProductionHistoryEntry();
@@ -39,13 +39,13 @@ export default function EditProductionReportDialog({
     if (entry) {
       setTodayProduction(entry.todayProduction.toString());
       setTotalCompleted(entry.totalCompleted.toString());
-      setDespatched(entry.despatched.toString());
+      setDispatched(entry.dispatched.toString());
       setErrors({});
     }
   }, [entry]);
 
   // Calculate in-hand value
-  const inHand = Math.max(0, Number(totalCompleted) - Number(despatched));
+  const inHand = Math.max(0, Number(totalCompleted) - Number(dispatched));
 
   // Validation
   const validate = () => {
@@ -53,7 +53,7 @@ export default function EditProductionReportDialog({
 
     const todayProd = Number(todayProduction);
     const totalComp = Number(totalCompleted);
-    const desp = Number(despatched);
+    const disp = Number(dispatched);
 
     if (isNaN(todayProd) || todayProd < 0) {
       newErrors.todayProduction = "Must be a non-negative number";
@@ -63,12 +63,12 @@ export default function EditProductionReportDialog({
       newErrors.totalCompleted = "Must be a non-negative number";
     }
 
-    if (isNaN(desp) || desp < 0) {
-      newErrors.despatched = "Must be a non-negative number";
+    if (isNaN(disp) || disp < 0) {
+      newErrors.dispatched = "Must be a non-negative number";
     }
 
-    if (totalComp < desp) {
-      newErrors.despatched = "Cannot exceed total completed";
+    if (totalComp < disp) {
+      newErrors.dispatched = "Cannot exceed total completed";
     }
 
     setErrors(newErrors);
@@ -85,12 +85,11 @@ export default function EditProductionReportDialog({
         reportId: entry.id,
         todayProduction: BigInt(todayProduction),
         totalCompleted: BigInt(totalCompleted),
-        despatched: BigInt(despatched),
+        dispatched: BigInt(dispatched),
         inHand: BigInt(inHand),
       });
       onSuccess();
     } catch (error) {
-      // Error is handled by the mutation hook with toast
       console.error('Failed to update production report:', error);
     }
   };
@@ -173,23 +172,23 @@ export default function EditProductionReportDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="despatched">
-              Despatched <span className="text-destructive">*</span>
+            <Label htmlFor="dispatched">
+              Dispatched <span className="text-destructive">*</span>
             </Label>
             <Input
-              id="despatched"
+              id="dispatched"
               type="number"
               min="0"
-              value={despatched}
+              value={dispatched}
               onChange={(e) => {
-                setDespatched(e.target.value);
-                setErrors((prev) => ({ ...prev, despatched: '' }));
+                setDispatched(e.target.value);
+                setErrors((prev) => ({ ...prev, dispatched: '' }));
               }}
               onBlur={validate}
-              className={errors.despatched ? 'border-destructive' : ''}
+              className={errors.dispatched ? 'border-destructive' : ''}
             />
-            {errors.despatched && (
-              <p className="text-xs text-destructive">{errors.despatched}</p>
+            {errors.dispatched && (
+              <p className="text-xs text-destructive">{errors.dispatched}</p>
             )}
           </div>
 
@@ -200,7 +199,7 @@ export default function EditProductionReportDialog({
               {inHand}
             </div>
             <p className="text-xs text-muted-foreground">
-              Calculated as: Total Completed - Despatched
+              Calculated as: Total Completed - Dispatched
             </p>
           </div>
         </div>

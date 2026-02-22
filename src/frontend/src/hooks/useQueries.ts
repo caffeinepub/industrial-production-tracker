@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, ProductionEntry, DispatchEntry, ContainerType, ContainerStatus, Shift, DailyProductionReport, MonthlyProductionTotals, MasterOrderStatus, HistoricalOpeningBalance } from '../backend';
+import type { UserProfile, ProductionEntry, DispatchEntry, ContainerType, ContainerStatus, Shift, DailyProductionReport, MonthlyProductionTotals, MasterOrderStatus, HistoricalOpeningBalance, DailyReportBatchEntry } from '../backend';
 import { toast } from 'sonner';
 
 export function useGetCallerUserProfile() {
@@ -101,7 +101,7 @@ export function useGetProductionStats() {
       return actor.getDailyProductionByStatus();
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 }
 
@@ -178,7 +178,6 @@ export function useGetDispatchEntries() {
     queryKey: ['dispatchEntries'],
     queryFn: async () => {
       if (!actor) return [];
-      // Using 0 for start and a large number for end to get all entries
       return actor.getDispatchEntriesByDate(BigInt(0), BigInt(Date.now() * 1000000));
     },
     enabled: !!actor && !isFetching,
@@ -272,7 +271,7 @@ export function useCreateDailyProductionReport() {
       operationName: string;
       todayProduction: bigint;
       totalCompleted: bigint;
-      despatched: bigint;
+      dispatched: bigint;
       inHand: bigint;
     }) => {
       if (!actor) throw new Error('Actor not available');
@@ -281,7 +280,7 @@ export function useCreateDailyProductionReport() {
         data.operationName,
         data.todayProduction,
         data.totalCompleted,
-        data.despatched,
+        data.dispatched,
         data.inHand
       );
     },
@@ -300,42 +299,6 @@ export function useCreateDailyProductionReport() {
   });
 }
 
-export function useUpdateDailyProductionReport() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: {
-      id: bigint;
-      todayProduction: bigint;
-      totalCompleted: bigint;
-      despatched: bigint;
-      inHand: bigint;
-    }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.updateDailyProductionReport(
-        data.id,
-        data.todayProduction,
-        data.totalCompleted,
-        data.despatched,
-        data.inHand
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dailyProductionReports'] });
-      toast.success('Production report updated successfully');
-    },
-    onError: (error: Error) => {
-      const errorMessage = error.message || 'Unknown error';
-      if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
-        toast.error('Access denied: Only admins can update production reports');
-      } else {
-        toast.error(`Failed to update report: ${errorMessage}`);
-      }
-    },
-  });
-}
-
 export function useUpdateProductionHistoryEntry() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -345,7 +308,7 @@ export function useUpdateProductionHistoryEntry() {
       reportId: bigint;
       todayProduction: bigint;
       totalCompleted: bigint;
-      despatched: bigint;
+      dispatched: bigint;
       inHand: bigint;
     }) => {
       if (!actor) throw new Error('Actor not available');
@@ -353,7 +316,7 @@ export function useUpdateProductionHistoryEntry() {
         data.reportId,
         data.todayProduction,
         data.totalCompleted,
-        data.despatched,
+        data.dispatched,
         data.inHand
       );
     },
@@ -386,7 +349,7 @@ export function useSubmitOrUpdateDailyReport() {
       operationName: string;
       todayProduction: bigint;
       totalCompleted: bigint;
-      despatched: bigint;
+      dispatched: bigint;
       inHand: bigint;
     }) => {
       if (!actor) throw new Error('Actor not available');
@@ -395,7 +358,7 @@ export function useSubmitOrUpdateDailyReport() {
         data.operationName,
         data.todayProduction,
         data.totalCompleted,
-        data.despatched,
+        data.dispatched,
         data.inHand
       );
     },
@@ -418,11 +381,78 @@ export function useSubmitOrUpdateDailyReport() {
   });
 }
 
+export function useSubmitDailyReportBatch() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { date: string; operations: DailyReportBatchEntry[] }) => {
+      if (!actor) throw new Error('Actor not available');
+      
+      // Use the backend's batchUpdateDailyProductionReport method
+      await actor.batchUpdateDailyProductionReport(data.date, data.operations);
+      
+      return { count: data.operations.length };
+    },
+    onSuccess: (result) => {
+      // Invalidate all relevant queries to trigger dashboard refresh
+      queryClient.invalidateQueries({ queryKey: ['dailyProductionReports'] });
+      queryClient.invalidateQueries({ queryKey: ['monthlyProductionSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['productionTrendData'] });
+      queryClient.invalidateQueries({ queryKey: ['operationComparisonData'] });
+      queryClient.invalidateQueries({ queryKey: ['productionHistoryByDateRange'] });
+      queryClient.invalidateQueries({ queryKey: ['masterOrderStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['enhancedMasterOrderStatus'] });
+      
+      toast.success(`Successfully submitted ${result.count} production reports`);
+    },
+    onError: (error: Error) => {
+      const errorMessage = error.message || 'Unknown error';
+      if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
+        toast.error('Access denied: Only admins can submit batch production reports');
+      } else {
+        toast.error(`Failed to submit batch reports: ${errorMessage}`);
+      }
+    },
+  });
+}
+
+export function useUpdateMasterOrderStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      totalManufactured: bigint;
+      totalDispatched: bigint;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateMasterOrderStatus(
+        data.totalManufactured,
+        data.totalDispatched
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['masterOrderStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['enhancedMasterOrderStatus'] });
+      toast.success('Master order status updated successfully');
+    },
+    onError: (error: Error) => {
+      const errorMessage = error.message || 'Unknown error';
+      if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
+        toast.error('Access denied: Only admins can update master order status');
+      } else {
+        toast.error(`Failed to update master order status: ${errorMessage}`);
+      }
+    },
+  });
+}
+
 export function useMonthlyProductionSummary() {
   const { actor, isFetching } = useActor();
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth() + 1; // JavaScript months are 0-indexed
+  const month = now.getMonth() + 1;
   const currentDay = now.getDate();
 
   return useQuery({
@@ -450,7 +480,7 @@ export function useMonthlyProductionSummary() {
       };
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 }
 
@@ -462,7 +492,6 @@ export function useProductionTrendData() {
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       
-      // Fetch all production reports across all operations
       const allOperations = [
         'Boxing',
         'Welding/Finishing',
@@ -489,27 +518,21 @@ export function useProductionTrendData() {
         allReports.push(...reports);
       }
 
-      // Aggregate by date
       const dateMap = new Map<string, number>();
       allReports.forEach((report) => {
-        if (report.date && report.date !== '') {
+        if (report.date) {
           const currentTotal = dateMap.get(report.date) || 0;
           dateMap.set(report.date, currentTotal + Number(report.todayProduction));
         }
       });
 
-      // Convert to array and sort by date
       const trendData = Array.from(dateMap.entries())
-        .map(([date, totalProduction]) => ({
-          date,
-          totalProduction,
-        }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        .map(([date, totalProduction]) => ({ date, totalProduction }))
+        .sort((a, b) => a.date.localeCompare(b.date));
 
       return trendData;
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 30000,
   });
 }
 
@@ -520,7 +543,7 @@ export function useOperationComparisonData() {
     queryKey: ['operationComparisonData'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      
+
       const allOperations = [
         'Boxing',
         'Welding/Finishing',
@@ -541,27 +564,20 @@ export function useOperationComparisonData() {
         'Black Paint',
       ];
 
-      const comparisonData: Array<{ operation: string; totalProduction: number }> = [];
-
-      for (const operation of allOperations) {
-        const reports = await actor.getDailyProductionReportsByOperation(operation);
-        
-        // Sum up total production for this operation
-        const totalProduction = reports.reduce(
-          (sum, report) => sum + Number(report.todayProduction),
-          0
-        );
-
-        comparisonData.push({
-          operation,
-          totalProduction,
-        });
-      }
+      const comparisonData = await Promise.all(
+        allOperations.map(async (operation) => {
+          const reports = await actor.getDailyProductionReportsByOperation(operation);
+          const latestReport = reports.length > 0 ? reports[reports.length - 1] : null;
+          return {
+            operation,
+            totalCompleted: latestReport ? Number(latestReport.totalCompleted) : 0,
+          };
+        })
+      );
 
       return comparisonData;
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 30000,
   });
 }
 
@@ -578,33 +594,16 @@ export function useGetMasterOrderStatus() {
   });
 }
 
-export function useUpdateMasterOrderStatus() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
+export function useGetEnhancedMasterOrderStatus() {
+  const { actor, isFetching } = useActor();
 
-  return useMutation({
-    mutationFn: async (data: {
-      totalManufactured: bigint;
-      totalDispatched: bigint;
-    }) => {
+  return useQuery({
+    queryKey: ['enhancedMasterOrderStatus'],
+    queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateMasterOrderStatus(
-        data.totalManufactured,
-        data.totalDispatched
-      );
+      return actor.getEnhancedMasterOrderStatus();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['masterOrderStatus'] });
-      toast.success('Master order status updated successfully');
-    },
-    onError: (error: Error) => {
-      const errorMessage = error.message || 'Unknown error';
-      if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
-        toast.error('Access denied: Only admins can update master order status');
-      } else {
-        toast.error(`Failed to update master order: ${errorMessage}`);
-      }
-    },
+    enabled: !!actor && !isFetching,
   });
 }
 
@@ -644,17 +643,12 @@ export function useCreateHistoricalOpeningBalance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['historicalOpeningBalance'] });
-      queryClient.invalidateQueries({ queryKey: ['masterOrderStatus'] });
-      queryClient.invalidateQueries({ queryKey: ['dailyProductionReports'] });
-      queryClient.invalidateQueries({ queryKey: ['productionTrendData'] });
       toast.success('Historical opening balance created successfully');
     },
     onError: (error: Error) => {
       const errorMessage = error.message || 'Unknown error';
       if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
         toast.error('Access denied: Only admins can create opening balance');
-      } else if (errorMessage.includes('already exists')) {
-        toast.error('Opening balance already exists. Only one entry is allowed.');
       } else {
         toast.error(`Failed to create opening balance: ${errorMessage}`);
       }

@@ -47,7 +47,7 @@ export default function DailyProductionReportTable() {
                   <TableHead>Operation Name</TableHead>
                   <TableHead className="text-right">Today's Production</TableHead>
                   <TableHead className="text-right">Total Completed</TableHead>
-                  <TableHead className="text-right">Despatched</TableHead>
+                  <TableHead className="text-right">Dispatched</TableHead>
                   <TableHead className="text-right">In Hand</TableHead>
                 </TableRow>
               </TableHeader>
@@ -58,7 +58,7 @@ export default function DailyProductionReportTable() {
                       <TableCell className="font-medium">{report.operationName}</TableCell>
                       <TableCell className="text-right">{Number(report.todayProduction)}</TableCell>
                       <TableCell className="text-right">{Number(report.totalCompleted)}</TableCell>
-                      <TableCell className="text-right">{Number(report.despatched)}</TableCell>
+                      <TableCell className="text-right">{Number(report.dispatched)}</TableCell>
                       <TableCell className="text-right">{Number(report.inHand)}</TableCell>
                     </TableRow>
                   ))

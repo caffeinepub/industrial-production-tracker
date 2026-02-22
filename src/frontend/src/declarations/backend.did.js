@@ -13,6 +13,14 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const DailyReportBatchEntry = IDL.Record({
+  'todayProduction' : IDL.Nat,
+  'totalCompleted' : IDL.Nat,
+  'date' : IDL.Text,
+  'operationName' : IDL.Text,
+  'dispatched' : IDL.Nat,
+  'inHand' : IDL.Nat,
+});
 export const ContainerType = IDL.Variant({
   'flatPack' : IDL.Null,
   'fullContainer' : IDL.Null,
@@ -35,11 +43,11 @@ export const UserProfile = IDL.Record({
 });
 export const DailyProductionReport = IDL.Record({
   'id' : IDL.Nat,
-  'despatched' : IDL.Nat,
   'todayProduction' : IDL.Nat,
   'totalCompleted' : IDL.Nat,
   'date' : IDL.Text,
   'operationName' : IDL.Text,
+  'dispatched' : IDL.Nat,
   'inHand' : IDL.Nat,
 });
 export const DispatchEntry = IDL.Record({
@@ -50,6 +58,16 @@ export const DispatchEntry = IDL.Record({
   'deliveryStatus' : IDL.Text,
   'containerType' : ContainerType,
   'quantity' : IDL.Nat,
+});
+export const EnhancedMasterOrderStatus = IDL.Record({
+  'id' : IDL.Nat,
+  'totalDispatched' : IDL.Nat,
+  'totalManufactured' : IDL.Nat,
+  'completionPercentage' : IDL.Float64,
+  'orderName' : IDL.Text,
+  'remainingToProduce' : IDL.Nat,
+  'totalOrderQuantity' : IDL.Nat,
+  'finishedStock' : IDL.Nat,
 });
 export const ProductionEntry = IDL.Record({
   'status' : ContainerStatus,
@@ -91,6 +109,11 @@ export const OperationStatus = IDL.Record({
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'batchUpdateDailyProductionReport' : IDL.Func(
+      [IDL.Text, IDL.Vec(DailyReportBatchEntry)],
+      [],
+      [],
+    ),
   'createDailyProductionReport' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
       [IDL.Nat],
@@ -141,6 +164,11 @@ export const idlService = IDL.Service({
   'getDispatchEntriesByDate' : IDL.Func(
       [Time, Time],
       [IDL.Vec(DispatchEntry)],
+      ['query'],
+    ),
+  'getEnhancedMasterOrderStatus' : IDL.Func(
+      [],
+      [EnhancedMasterOrderStatus],
       ['query'],
     ),
   'getFilteredProductionEntries' : IDL.Func(
@@ -200,6 +228,14 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const DailyReportBatchEntry = IDL.Record({
+    'todayProduction' : IDL.Nat,
+    'totalCompleted' : IDL.Nat,
+    'date' : IDL.Text,
+    'operationName' : IDL.Text,
+    'dispatched' : IDL.Nat,
+    'inHand' : IDL.Nat,
+  });
   const ContainerType = IDL.Variant({
     'flatPack' : IDL.Null,
     'fullContainer' : IDL.Null,
@@ -222,11 +258,11 @@ export const idlFactory = ({ IDL }) => {
   });
   const DailyProductionReport = IDL.Record({
     'id' : IDL.Nat,
-    'despatched' : IDL.Nat,
     'todayProduction' : IDL.Nat,
     'totalCompleted' : IDL.Nat,
     'date' : IDL.Text,
     'operationName' : IDL.Text,
+    'dispatched' : IDL.Nat,
     'inHand' : IDL.Nat,
   });
   const DispatchEntry = IDL.Record({
@@ -237,6 +273,16 @@ export const idlFactory = ({ IDL }) => {
     'deliveryStatus' : IDL.Text,
     'containerType' : ContainerType,
     'quantity' : IDL.Nat,
+  });
+  const EnhancedMasterOrderStatus = IDL.Record({
+    'id' : IDL.Nat,
+    'totalDispatched' : IDL.Nat,
+    'totalManufactured' : IDL.Nat,
+    'completionPercentage' : IDL.Float64,
+    'orderName' : IDL.Text,
+    'remainingToProduce' : IDL.Nat,
+    'totalOrderQuantity' : IDL.Nat,
+    'finishedStock' : IDL.Nat,
   });
   const ProductionEntry = IDL.Record({
     'status' : ContainerStatus,
@@ -278,6 +324,11 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'batchUpdateDailyProductionReport' : IDL.Func(
+        [IDL.Text, IDL.Vec(DailyReportBatchEntry)],
+        [],
+        [],
+      ),
     'createDailyProductionReport' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
         [IDL.Nat],
@@ -328,6 +379,11 @@ export const idlFactory = ({ IDL }) => {
     'getDispatchEntriesByDate' : IDL.Func(
         [Time, Time],
         [IDL.Vec(DispatchEntry)],
+        ['query'],
+      ),
+    'getEnhancedMasterOrderStatus' : IDL.Func(
+        [],
+        [EnhancedMasterOrderStatus],
         ['query'],
       ),
     'getFilteredProductionEntries' : IDL.Func(

@@ -4,15 +4,17 @@ import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Text "mo:core/Text";
 import List "mo:core/List";
-import Order "mo:core/Order";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
+import Float "mo:core/Float";
+import Order "mo:core/Order";
 import Migration "migration";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+// Apply migration on upgrade
 (with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
@@ -73,7 +75,16 @@ actor {
     operationName : Text;
     todayProduction : Nat;
     totalCompleted : Nat;
-    despatched : Nat;
+    dispatched : Nat;
+    inHand : Nat;
+  };
+
+  public type DailyReportBatchEntry = {
+    date : Text;
+    operationName : Text;
+    todayProduction : Nat;
+    totalCompleted : Nat;
+    dispatched : Nat;
     inHand : Nat;
   };
 
@@ -89,6 +100,17 @@ actor {
     totalOrderQuantity : Nat;
     totalManufactured : Nat;
     totalDispatched : Nat;
+  };
+
+  public type EnhancedMasterOrderStatus = {
+    id : Nat;
+    orderName : Text;
+    totalOrderQuantity : Nat;
+    totalManufactured : Nat;
+    totalDispatched : Nat;
+    remainingToProduce : Nat;
+    finishedStock : Nat;
+    completionPercentage : Float;
   };
 
   public type HistoricalOpeningBalance = {
@@ -109,7 +131,7 @@ actor {
 
   var nextProductionId : Nat = 0;
   var nextDispatchId : Nat = 0;
-  var nextReportId : Nat = 17;
+  var nextReportId : Nat = 34;
 
   let initialOperations = [
     "Boxing",
@@ -135,7 +157,7 @@ actor {
     id = 0;
     orderName = "First Lot – 600 Units";
     totalOrderQuantity = 600;
-    totalManufactured = 344;
+    totalManufactured = 345;
     totalDispatched = 344;
   };
 
@@ -153,14 +175,20 @@ actor {
         operationName = operation;
         todayProduction = 0;
         totalCompleted = 0;
-        despatched = 0;
+        dispatched = 0;
         inHand = 0;
       };
       dailyProductionReports.add(i, report);
     };
   };
 
-  public shared ({ caller }) func createHistoricalOpeningBalance(openingDate : Text, manufacturedBeforeSystem : Nat, dispatchedBeforeSystem : Nat, manufacturingStartDate : Text, systemGoLiveDate : Text) : async () {
+  public shared ({ caller }) func createHistoricalOpeningBalance(
+    openingDate : Text,
+    manufacturedBeforeSystem : Nat,
+    dispatchedBeforeSystem : Nat,
+    manufacturingStartDate : Text,
+    systemGoLiveDate : Text,
+  ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
@@ -314,6 +342,26 @@ actor {
     masterOrderStatus;
   };
 
+  public query ({ caller }) func getEnhancedMasterOrderStatus() : async EnhancedMasterOrderStatus {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
+
+    let finishedStock = masterOrderStatus.totalManufactured - masterOrderStatus.totalDispatched;
+    let completionPercentage = ((masterOrderStatus.totalManufactured.toFloat() / masterOrderStatus.totalOrderQuantity.toFloat()) * 100.0);
+
+    {
+      id = masterOrderStatus.id;
+      orderName = masterOrderStatus.orderName;
+      totalOrderQuantity = masterOrderStatus.totalOrderQuantity;
+      totalManufactured = masterOrderStatus.totalManufactured;
+      totalDispatched = masterOrderStatus.totalDispatched;
+      remainingToProduce = masterOrderStatus.totalOrderQuantity - masterOrderStatus.totalManufactured;
+      finishedStock;
+      completionPercentage;
+    };
+  };
+
   public shared ({ caller }) func updateMasterOrderStatus(totalManufactured : Nat, totalDispatched : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
@@ -412,7 +460,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func createDailyProductionReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async Nat {
+  public shared ({ caller }) func createDailyProductionReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, dispatched : Nat, inHand : Nat) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
@@ -423,7 +471,7 @@ actor {
       operationName;
       todayProduction;
       totalCompleted;
-      despatched;
+      dispatched;
       inHand;
     };
 
@@ -432,11 +480,11 @@ actor {
     report.id;
   };
 
-  public shared ({ caller }) func updateDailyProductionReport(_id : Nat, _todayProduction : Nat, _totalCompleted : Nat, _despatched : Nat, _inHand : Nat) : async () {
+  public shared ({ caller }) func updateDailyProductionReport(_id : Nat, _todayProduction : Nat, _totalCompleted : Nat, _dispatched : Nat, _inHand : Nat) : async () {
     Runtime.trap("This update function is deprecated! Please call `updateDailyProductionReportById` instead.");
   };
 
-  public shared ({ caller }) func updateDailyProductionReportById(reportId : Nat, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async () {
+  public shared ({ caller }) func updateDailyProductionReportById(reportId : Nat, todayProduction : Nat, totalCompleted : Nat, dispatched : Nat, inHand : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
@@ -451,7 +499,7 @@ actor {
           operationName = existingReport.operationName;
           todayProduction;
           totalCompleted;
-          despatched;
+          dispatched;
           inHand;
         };
         dailyProductionReports.add(reportId, updatedReport);
@@ -459,7 +507,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func submitOrUpdateDailyReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async Nat {
+  public shared ({ caller }) func submitOrUpdateDailyReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, dispatched : Nat, inHand : Nat) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
@@ -468,11 +516,39 @@ actor {
 
     switch (existingReportId) {
       case (null) {
-        let reportId = await createDailyProductionReport(date, operationName, todayProduction, totalCompleted, despatched, inHand);
+        let report : DailyProductionReport = {
+          id = nextReportId;
+          date;
+          operationName;
+          todayProduction;
+          totalCompleted;
+          dispatched;
+          inHand;
+        };
+
+        dailyProductionReports.add(nextReportId, report);
+        let reportId = nextReportId;
+        nextReportId += 1;
         reportId;
       };
       case (?id) {
-        await updateDailyProductionReportById(id, todayProduction, totalCompleted, despatched, inHand);
+        switch (dailyProductionReports.get(id)) {
+          case (null) {
+            Runtime.trap("Production report with ID " # id.toText() # " not found");
+          };
+          case (?existingReport) {
+            let updatedReport = {
+              id = existingReport.id;
+              date = existingReport.date;
+              operationName = existingReport.operationName;
+              todayProduction;
+              totalCompleted;
+              dispatched;
+              inHand;
+            };
+            dailyProductionReports.add(id, updatedReport);
+          };
+        };
         id;
       };
     };
@@ -485,6 +561,54 @@ actor {
       };
     };
     null;
+  };
+
+  public shared ({ caller }) func batchUpdateDailyProductionReport(date : Text, operations : [DailyReportBatchEntry]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    for (operation in operations.values()) {
+      let existingReportId = findReportId(date, operation.operationName);
+      let inHand = if (operation.totalCompleted >= operation.dispatched) {
+        operation.totalCompleted - operation.dispatched;
+      } else { 0 };
+
+      switch (existingReportId) {
+        case (null) {
+          let report : DailyProductionReport = {
+            id = nextReportId;
+            date;
+            operationName = operation.operationName;
+            todayProduction = operation.todayProduction;
+            totalCompleted = operation.totalCompleted;
+            dispatched = operation.dispatched;
+            inHand;
+          };
+          dailyProductionReports.add(nextReportId, report);
+          nextReportId += 1;
+        };
+        case (?id) {
+          switch (dailyProductionReports.get(id)) {
+            case (null) {
+              Runtime.trap("Production report with ID " # id.toText() # " not found");
+            };
+            case (?existingReport) {
+              let updatedReport = {
+                id = existingReport.id;
+                date = existingReport.date;
+                operationName = existingReport.operationName;
+                todayProduction = operation.todayProduction;
+                totalCompleted = operation.totalCompleted;
+                dispatched = operation.dispatched;
+                inHand;
+              };
+              dailyProductionReports.add(id, updatedReport);
+            };
+          };
+        };
+      };
+    };
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -508,3 +632,4 @@ actor {
     userProfiles.add(caller, profile);
   };
 };
+
