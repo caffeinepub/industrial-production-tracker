@@ -1,0 +1,89 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-22T09:29:54.888Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 7,
+    "implemented": 0,
+    "items": [
+      {
+        "id": "REQ-69",
+        "summary": "Fix UserRole type definition in backend/migration.mo to use correct Motoko variant syntax with #Admin and #Viewer constructor tags instead of plain identifiers",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-70",
+        "summary": "Fix requireAdmin() function in backend/main.mo to use correct pattern matching syntax for UserRole variant, checking for #Admin tag and throwing descriptive error for unauthorized access",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-71",
+        "summary": "Fix requireAuthenticated() function in backend/main.mo to properly validate caller has a valid UserProfile with any role (#Admin or #Viewer) and throw error if profile does not exist",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-72",
+        "summary": "Implement stable storage migration logic in backend/migration.mo to safely add role field to existing UserProfile records, defaulting all existing profiles to #Admin role for backward compatibility",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-73",
+        "summary": "Ensure type consistency between UserRole and UserProfile definitions in both backend/main.mo and backend/migration.mo, using identical type signatures",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-74",
+        "summary": "Fix createUserProfile mutation in backend/main.mo to correctly accept role parameter as UserRole variant (#Admin or #Viewer) from frontend and save it to UserProfile record",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-75",
+        "summary": "Verify all mutation operations in backend/main.mo (createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, updateDailyProductionReportById) call requireAdmin() at the start of their function bodies with proper error propagation",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AccessDeniedScreen.tsx",
+    "frontend/src/components/DispatchHistoryTable.tsx",
+    "frontend/src/components/ProductionHistoryDetailTable.tsx",
+    "frontend/src/components/ProfileSetup.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/DailyProductionReportPage.tsx",
+    "frontend/src/pages/DispatchTrackingPage.tsx",
+    "frontend/src/pages/ProductionEntryPage.tsx",
+    "frontend/src/pages/ProductionHistoryPage.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

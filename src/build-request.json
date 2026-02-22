@@ -1,0 +1,151 @@
+{
+  "kind": "build_request",
+  "title": "Fix role-based access control implementation errors",
+  "projectName": "Container Production Tracker",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-69",
+      "text": "Fix UserRole type definition in backend/migration.mo to use correct Motoko variant syntax with #Admin and #Viewer constructor tags instead of plain identifiers",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Deployment error",
+          "Type definition issues with the UserRole enum in Motoko"
+        ]
+      },
+      "acceptanceCriteria": [
+        "UserRole type in backend/migration.mo uses proper variant syntax: type UserRole = {#Admin; #Viewer;}",
+        "No compilation errors related to UserRole type definition"
+      ]
+    },
+    {
+      "id": "REQ-70",
+      "text": "Fix requireAdmin() function in backend/main.mo to use correct pattern matching syntax for UserRole variant, checking for #Admin tag and throwing descriptive error for unauthorized access",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Authorization function implementation problems"
+        ]
+      },
+      "acceptanceCriteria": [
+        "requireAdmin() correctly pattern matches on UserRole variant using switch statement or case expression",
+        "Function throws error with message 'Unauthorized: Admin role required' when caller has #Viewer role",
+        "Function allows execution to continue when caller has #Admin role"
+      ]
+    },
+    {
+      "id": "REQ-71",
+      "text": "Fix requireAuthenticated() function in backend/main.mo to properly validate caller has a valid UserProfile with any role (#Admin or #Viewer) and throw error if profile does not exist",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Authorization function implementation problems"
+        ]
+      },
+      "acceptanceCriteria": [
+        "requireAuthenticated() retrieves caller's UserProfile from stable storage",
+        "Function throws error with message 'Unauthorized: Authentication required' when profile is null or missing",
+        "Function allows execution to continue when valid profile exists with any role"
+      ]
+    },
+    {
+      "id": "REQ-72",
+      "text": "Implement stable storage migration logic in backend/migration.mo to safely add role field to existing UserProfile records, defaulting all existing profiles to #Admin role for backward compatibility",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Stable storage migration issues when adding the new role field to existing UserProfile records"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Migration function checks if UserProfile records exist without role field",
+        "All existing UserProfile records are updated with role field set to #Admin",
+        "Migration preserves all other UserProfile data (name, department, principal)",
+        "New UserProfile records use the role value provided during creation"
+      ]
+    },
+    {
+      "id": "REQ-73",
+      "text": "Ensure type consistency between UserRole and UserProfile definitions in both backend/main.mo and backend/migration.mo, using identical type signatures",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Type consistency between main.mo and migration.mo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "UserRole type definition is identical in both backend/main.mo and backend/migration.mo",
+        "UserProfile type definition is identical in both files including the role field type",
+        "No type mismatch compilation errors between main actor and migration module"
+      ]
+    },
+    {
+      "id": "REQ-74",
+      "text": "Fix createUserProfile mutation in backend/main.mo to correctly accept role parameter as UserRole variant (#Admin or #Viewer) from frontend and save it to UserProfile record",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Ensure the createUserProfile mutation in backend/main.mo properly handles the role parameter"
+        ]
+      },
+      "acceptanceCriteria": [
+        "createUserProfile function signature includes role parameter of type UserRole",
+        "Function correctly stores the role value in the UserProfile record",
+        "No type conversion errors when saving UserRole variant to stable storage"
+      ]
+    },
+    {
+      "id": "REQ-75",
+      "text": "Verify all mutation operations in backend/main.mo (createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, updateDailyProductionReportById) call requireAdmin() at the start of their function bodies with proper error propagation",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Proper error handling for authorization failures"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each mutation function calls requireAdmin() as the first statement",
+        "Authorization errors are properly propagated to the caller",
+        "Functions return appropriate error responses when authorization fails"
+      ]
+    }
+  ],
+  "constraints": [
+    "Maintain single-actor architecture with all logic in backend/main.mo",
+    "Preserve all existing stable storage data during migration",
+    "Do not modify frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts",
+    "Ensure backward compatibility with existing UserProfile records"
+  ],
+  "nonGoals": [
+    "Adding new authorization roles beyond Admin and Viewer",
+    "Implementing fine-grained permission controls",
+    "Adding audit logging for authorization failures",
+    "Changing the frontend role selection UI"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

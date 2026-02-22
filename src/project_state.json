@@ -1,0 +1,688 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 23,
+  "summary": "Responsive industrial production tracking web application for a Shipping Container Manufacturing Unit with role-based access control (Admin/Viewer), admin login, daily data entry, dashboard, history tracking, and dispatch management",
+  "architectural_notes": [
+    "Mobile-first responsive design for smartphone data entry",
+    "Clean industrial dashboard style UI with table layouts and summary cards",
+    "Web-based application for shipping container manufacturing tracking",
+    "Database schema: Daily_Production_Report table tracks 40ft High Cube container manufacturing with operation-level daily metrics",
+    "17 manufacturing operations tracked: Boxing, Welding/Finishing, Rear Wall, Front Wall, Side Wall, Roof, Rear Door, Blasting & Primer, Final Paint, Gasket, DLM, Plywood, Floor Screw, Decal, Data Plate, Sikha, Black Paint",
+    "Production Dashboard auto-refreshes data when new entries are submitted",
+    "Monthly Production Summary with fixed target of 100 containers and calculated metrics",
+    "Production History page allows filtering by date range and editing historical production entries",
+    "Role-based access control: Admin users can add/edit production data, Viewer users can only view dashboard data"
+  ],
+  "known_issues": [],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-implement-admin-authentication-system-with-login-functionality-using-internet-identity-integration",
+      "title": "Implement admin authentication system with login functionality using Internet Identity integration",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-daily-production-data-entry-form-allowing-input-of-container-production-metrics-including-container-type-quantity-produced-shift-details-and-operation-status",
+      "title": "Create daily production data entry form allowing input of container production metrics including container type, quantity produced, shift details, and operation status",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-production-dashboard-displaying-real-time-summary-statistics-including-total-containers-produced-current-day-production-and-status-breakdowns-using-summary-cards",
+      "title": "Build production dashboard displaying real-time summary statistics including total containers produced, current day production, and status breakdowns using summary cards",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-date-wise-production-history-view-with-filterable-table-showing-all-production-entries-by-date-range",
+      "title": "Implement date-wise production history view with filterable table showing all production entries by date range",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-dispatch-tracking-module-to-record-and-display-container-dispatch-information-including-dispatch-date-destination-quantity-and-delivery-status",
+      "title": "Create dispatch tracking module to record and display container dispatch information including dispatch date, destination, quantity, and delivery status",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-develop-operation-wise-work-in-hand-status-view-showing-current-workload-and-pending-items-across-different-manufacturing-operations-e-g-cutting-welding-assembly-painting",
+      "title": "Develop operation-wise work in hand status view showing current workload and pending items across different manufacturing operations (e.g., cutting, welding, assembly, painting)",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-ui-components-are-fully-responsive-and-mobile-optimized-for-smartphone-data-entry-with-touch-friendly-controls-and-appropriate-viewport-scaling",
+      "title": "Ensure all UI components are fully responsive and mobile-optimized for smartphone data entry with touch-friendly controls and appropriate viewport scaling",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-clean-industrial-dashboard-design-aesthetic-with-neutral-professional-colors-clear-typography-structured-table-layouts-and-distinct-summary-cards-that-convey-technical-precision-and-operational-clarity",
+      "title": "Apply a clean industrial dashboard design aesthetic with neutral professional colors, clear typography, structured table layouts, and distinct summary cards that convey technical precision and operational clarity",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-frontend-page-displaying-the-daily-production-report-data-in-a-table-format-showing-all-operation-names-with-their-current-production-metrics-today-production-total-completed-despatched-in-hand-and-date-selection",
+      "title": "Create a frontend page displaying the Daily_Production_Report data in a table format showing all operation names with their current production metrics (today_production, total_completed, despatched, in_hand) and date selection",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-form-interface-for-updating-daily-production-report-entries-allowing-users-to-select-an-operation-and-input-today-s-production-metrics-with-validation",
+      "title": "Create a form interface for updating Daily_Production_Report entries allowing users to select an operation and input today's production metrics with validation",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-admin-production-update-panel-form-interface-with-date-picker-for-selecting-date-dropdown-for-selecting-operation-name-from-the-17-pre-populated-operations-numeric-input-fields-for-today-s-production-total-completed-and-despatched-quantity",
+      "title": "Create an Admin Production Update Panel form interface with date picker for selecting date, dropdown for selecting operation name from the 17 pre-populated operations, numeric input fields for 'Today's Production', 'Total Completed', and 'Despatched Quantity'",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-automatic-calculation-of-in-hand-value-using-the-formula-in-hand-total-completed-despatched-displaying-the-calculated-result-in-real-time-as-user-enters-data",
+      "title": "Implement automatic calculation of 'In Hand' value using the formula: In Hand = Total Completed - Despatched, displaying the calculated result in real-time as user enters data",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-form-submission-handler-that-stores-all-entered-data-date-operation-name-today-production-total-completed-despatched-in-hand-to-the-daily-production-report-database-table-using-the-existing-backend-update-mutation",
+      "title": "Implement form submission handler that stores all entered data (date, operation_name, today_production, total_completed, despatched, in_hand) to the Daily_Production_Report database table using the existing backend update mutation",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enable-daily-data-updates-for-each-operation-by-allowing-admin-to-select-existing-operation-entries-and-update-their-production-metrics-for-different-dates",
+      "title": "Enable daily data updates for each operation by allowing admin to select existing operation entries and update their production metrics for different dates",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-production-dashboard-page-that-displays-a-date-wise-daily-production-table-with-columns-for-operation-name-today-s-production-total-completed-despatched-and-in-hand",
+      "title": "Create a new Production Dashboard page that displays a date-wise daily production table with columns for Operation Name, Today's Production, Total Completed, Despatched, and In Hand",
+      "reqIds": [
+        "REQ-18",
+        "REQ-22"
+      ],
+      "version": 2
+    },
+    {
+      "id": "feature-add-summary-cards-to-the-production-dashboard-displaying-total-container-produced-today-total-container-despatched-and-total-work-in-hand-calculated-from-all-operations",
+      "title": "Add summary cards to the Production Dashboard displaying Total Container Produced Today, Total Container Despatched, and Total Work in Hand calculated from all operations",
+      "reqIds": [
+        "REQ-19",
+        "REQ-23"
+      ],
+      "version": 2
+    },
+    {
+      "id": "feature-implement-auto-refresh-functionality-on-the-production-dashboard-that-updates-the-display-when-new-production-data-is-entered",
+      "title": "Implement auto-refresh functionality on the Production Dashboard that updates the display when new production data is entered",
+      "reqIds": [
+        "REQ-20",
+        "REQ-24"
+      ],
+      "version": 2
+    },
+    {
+      "id": "feature-add-navigation-link-to-the-new-production-dashboard-page-in-the-main-layout-menu",
+      "title": "Add navigation link to the new Production Dashboard page in the main layout menu",
+      "reqIds": [
+        "REQ-21",
+        "REQ-25"
+      ],
+      "version": 2
+    },
+    {
+      "id": "feature-add-a-monthly-production-summary-section-to-the-production-dashboard-live-page-displaying-four-key-metrics-total-containers-produced-this-month-sum-of-all-today-production-values-for-the-current-month-remaining-to-achieve-target-calculated-as-100-minus-total-produced-production-completion-percentage-calculated-as-total-produced-100-100-and-daily-average-production-total-produced-divided-by-number-of-days-elapsed-in-current-month",
+      "title": "Add a Monthly Production Summary section to the Production Dashboard Live page displaying four key metrics: Total Containers Produced This Month (sum of all today_production values for the current month), Remaining to Achieve Target (calculated as 100 minus total produced), Production Completion Percentage (calculated as (total produced / 100) * 100), and Daily Average Production (total produced divided by number of days elapsed in current month)",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-monthly-production-summary-using-summarycard-components-in-a-dedicated-section-above-the-existing-daily-summary-cards-with-clear-labeling-for-each-metric-and-appropriate-icons-representing-production-targets-completion-status-and-daily-averages",
+      "title": "Display the Monthly Production Summary using SummaryCard components in a dedicated section above the existing daily summary cards, with clear labeling for each metric and appropriate icons representing production targets, completion status, and daily averages",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-react-query-hook-to-fetch-monthly-production-totals-from-the-backend-automatically-calculating-derived-metrics-remaining-to-target-completion-percentage-daily-average-on-the-frontend-and-providing-real-time-updates-when-production-data-changes",
+      "title": "Implement a React Query hook to fetch monthly production totals from the backend, automatically calculating derived metrics (remaining to target, completion percentage, daily average) on the frontend, and providing real-time updates when production data changes",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-line-chart-component-displaying-date-vs-total-production-output-trend-showing-daily-production-totals-over-time-with-date-on-the-x-axis-and-total-production-quantity-on-the-y-axis",
+      "title": "Create a line chart component displaying Date vs Total Production Output trend, showing daily production totals over time with date on the x-axis and total production quantity on the y-axis",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-bar-chart-component-displaying-operation-wise-production-comparison-showing-total-production-output-for-each-of-the-17-operations-with-operation-names-on-the-x-axis-and-production-quantities-on-the-y-axis",
+      "title": "Create a bar chart component displaying Operation-wise Production Comparison, showing total production output for each of the 17 operations with operation names on the x-axis and production quantities on the y-axis",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-both-charts-into-the-production-dashboard-live-page-positioning-them-below-the-monthly-summary-cards-and-above-the-live-production-table",
+      "title": "Integrate both charts into the Production Dashboard Live page, positioning them below the monthly summary cards and above the live production table",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fetch-and-aggregate-production-data-for-the-trend-chart-using-react-query-calculating-daily-totals-by-summing-today-production-values-grouped-by-date-from-daily-production-report-entries",
+      "title": "Fetch and aggregate production data for the trend chart using React Query, calculating daily totals by summing today_production values grouped by date from Daily_Production_Report entries",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fetch-and-aggregate-production-data-for-the-operation-comparison-chart-using-react-query-calculating-total-production-per-operation-by-summing-today-production-values-grouped-by-operation-name-from-daily-production-report-entries",
+      "title": "Fetch and aggregate production data for the operation comparison chart using React Query, calculating total production per operation by summing today_production values grouped by operation_name from Daily_Production_Report entries",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-productionhistorypage-component-at-frontend-src-pages-productionhistorypage-tsx-that-serves-as-the-container-for-production-history-viewing-and-editing-functionality",
+      "title": "Create a new ProductionHistoryPage component at frontend/src/pages/ProductionHistoryPage.tsx that serves as the container for production history viewing and editing functionality",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-date-range-filter-component-on-the-production-history-page-with-start-date-and-end-date-pickers-that-allow-admin-to-filter-daily-production-report-entries-by-date-range",
+      "title": "Implement a date range filter component on the Production History Page with start date and end date pickers that allow admin to filter Daily_Production_Report entries by date range",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-react-query-hook-useproductionhistorybydaterange-that-fetches-daily-production-report-entries-for-a-specified-date-range-using-the-new-backend-query-function",
+      "title": "Create a React Query hook useProductionHistoryByDateRange that fetches Daily_Production_Report entries for a specified date range using the new backend query function",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-previous-production-entries-in-a-comprehensive-table-on-the-production-history-page-showing-all-fields-date-operation-name-today-production-total-completed-despatched-and-in-hand-for-all-entries-within-the-selected-date-range",
+      "title": "Display previous production entries in a comprehensive table on the Production History Page showing all fields: date, operation_name, today_production, total_completed, despatched, and in_hand for all entries within the selected date range",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-edit-action-button-or-icon-to-each-row-in-the-production-history-table-that-opens-an-edit-dialog-modal-when-clicked",
+      "title": "Add an edit action button or icon to each row in the production history table that opens an edit dialog/modal when clicked",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-edit-dialog-modal-component-that-displays-when-admin-clicks-edit-on-a-production-history-entry-pre-populating-all-fields-date-operation-name-today-production-total-completed-despatched-with-the-current-values-and-allowing-modification",
+      "title": "Create an edit dialog/modal component that displays when admin clicks edit on a production history entry, pre-populating all fields (date, operation_name, today_production, total_completed, despatched) with the current values and allowing modification",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-form-validation-in-the-edit-dialog-ensuring-that-today-production-total-completed-and-despatched-are-non-negative-numbers-and-that-the-calculated-in-hand-value-is-valid",
+      "title": "Implement form validation in the edit dialog ensuring that today_production, total_completed, and despatched are non-negative numbers, and that the calculated in_hand value is valid",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-react-query-mutation-hook-useupdateproductionhistoryentry-that-submits-updated-production-entry-data-to-the-backend-invalidates-relevant-queries-on-success-and-displays-toast-notifications-for-success-error-states",
+      "title": "Create a React Query mutation hook useUpdateProductionHistoryEntry that submits updated production entry data to the backend, invalidates relevant queries on success, and displays toast notifications for success/error states",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wire-the-edit-dialog-s-save-action-to-call-the-update-mutation-hook-close-the-dialog-on-success-and-refresh-the-production-history-table-to-reflect-the-updated-values",
+      "title": "Wire the edit dialog's save action to call the update mutation hook, close the dialog on success, and refresh the production history table to reflect the updated values",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-the-existing-industrial-dashboard-design-aesthetic-to-the-production-history-page-including-neutral-professional-colors-clear-typography-structured-table-layouts-and-touch-friendly-controls-consistent-with-other-pages-in-the-application",
+      "title": "Apply the existing industrial dashboard design aesthetic to the Production History Page including neutral professional colors, clear typography, structured table layouts, and touch-friendly controls consistent with other pages in the application",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-profilesetup-component-to-include-a-role-selector-dropdown-allowing-the-user-to-choose-between-admin-and-viewer-roles-during-initial-profile-setup",
+      "title": "Update ProfileSetup component to include a role selector dropdown allowing the user to choose between Admin and Viewer roles during initial profile setup",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-useuserrole-hook-in-frontend-src-hooks-usequeries-ts-that-fetches-the-current-user-s-profile-and-extracts-their-role-providing-role-checking-utilities-isadmin-and-isviewer",
+      "title": "Create a useUserRole hook in frontend/src/hooks/useQueries.ts that fetches the current user's profile and extracts their role, providing role checking utilities: isAdmin() and isViewer()",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-conditionally-hide-all-mutation-related-ui-elements-forms-edit-buttons-create-buttons-in-frontend-components-based-on-user-role-productionentryform-dailyproductionreportform-dispatchentryform-editproductionreportdialog-edit-buttons-and-dispatchhistorytable-status-update-actions-should-only-be-visible-to-admin-users",
+      "title": "Conditionally hide all mutation-related UI elements (forms, edit buttons, create buttons) in frontend components based on user role: ProductionEntryForm, DailyProductionReportForm, DispatchEntryForm, EditProductionReportDialog edit buttons, and DispatchHistoryTable status update actions should only be visible to Admin users",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-user-role-badge-in-the-layout-header-component-showing-whether-the-current-user-is-logged-in-as-admin-or-viewer",
+      "title": "Display user role badge in the Layout header component showing whether the current user is logged in as Admin or Viewer",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-all-frontend-mutation-hooks-in-usequeries-ts-to-handle-authorization-errors-gracefully-by-displaying-toast-notifications-with-clear-messages-like-you-do-not-have-permission-to-perform-this-action-when-backend-returns-authorization-errors",
+      "title": "Update all frontend mutation hooks in useQueries.ts to handle authorization errors gracefully by displaying toast notifications with clear messages like 'You do not have permission to perform this action' when backend returns authorization errors",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Admin Login System",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Daily Production Data Entry Panel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Production Dashboard",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Date-wise Production History",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Dispatch Tracking",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Operation-wise Work in Hand Status",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Create Daily_Production_Report database table with fields: id, date, operation_name, today_production, total_completed, despatched, in_hand",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Pre-populate Daily_Production_Report with 17 default operation names (Boxing, Welding/Finishing, Rear Wall, Front Wall, Side Wall, Roof, Rear Door, Blasting & Primer, Final Paint, Gasket, DLM, Plywood, Floor Screw, Decal, Data Plate, Sikha, Black Paint)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Create a Daily_Production_Report data structure in the backend with fields: id (Nat), date (Text), operation_name (Text), today_production (Nat), total_completed (Nat), despatched (Nat), in_hand (Nat)",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Initialize the Daily_Production_Report storage with 17 pre-populated operation entries: Boxing, Welding/Finishing, Rear Wall, Front Wall, Side Wall, Roof, Rear Door, Blasting & Primer, Final Paint, Gasket, DLM, Plywood, Floor Screw, Decal, Data Plate, Sikha, Black Paint",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Implement CRUD operations for Daily_Production_Report: create new report entries, read reports by date or operation, update existing report values, and query reports with filtering capabilities",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Create Admin Production Update Panel with date/operation selection, manual input fields (today_production, total_completed, despatched), auto-calculated in_hand (total_completed - despatched), and save to Daily_Production_Report",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Monthly Production Summary section showing: Monthly Target (100 containers), Total Containers Produced This Month, Remaining to Achieve Target, Production Completion Percentage, Daily Average Production",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Create a backend query function to aggregate monthly production data by summing today_production values from Daily_Production_Report entries for a specified month and year, returning the total containers produced for that month",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Create a graphical production trend chart showing Date vs Total Production Output",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Create an Operation-wise Production Comparison Bar Chart",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Install and configure a charting library (Recharts recommended for React compatibility) to render the production trend and comparison charts with proper TypeScript types",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Create Production History Page with date range filter, previous production entries view, and edit functionality for past entries",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Add navigation link to the Production History Page in the Layout component's header menu, positioned logically within the existing navigation items",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Create a backend query function getDailyProductionReportsByDateRange that accepts startDate and endDate parameters (Text format) and returns all Daily_Production_Report entries within that date range, sorted by date descending",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Create a backend update function updateDailyProductionReportById that accepts an entry ID and updated values (today_production, total_completed, despatched, in_hand) and updates the corresponding Daily_Production_Report entry with authorization check",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Implement role-based access control with Admin role (can add/edit production data) and Viewer role (can only view dashboard)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Ensure all production data is securely stored in the internal database with proper data persistence and integrity checks",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Create a UserRole enum in backend/migration.mo with two variants: Admin (can add/edit production data) and Viewer (can only view dashboard)",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Update the UserProfile type in backend/migration.mo to include a role field of type UserRole with Admin as the default role",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Implement authorization middleware functions in backend/main.mo: requireAdmin() that checks if the caller has Admin role and throws an error if not, and requireAuthenticated() that checks if the caller has any valid role",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Add requireAdmin() authorization checks to all mutation operations in backend/main.mo: createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, and updateDailyProductionReportById",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "Add requireAuthenticated() authorization checks to all query operations in backend/main.mo: getProductionEntries, getDispatchEntries, getDailyProductionReports, getDailyProductionReportsByDateRange, and getMonthlyProductionSummary to ensure only authenticated users can view data",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "Verify that all production data (ProductionEntry, DispatchEntry, DailyProductionReport, UserProfile) is persisted using stable storage variables in backend/main.mo to ensure data survives canister upgrades",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Add data validation in backend/main.mo for all mutation operations to ensure data integrity: non-negative numeric values for production quantities, valid date formats, non-empty required text fields, and referential integrity for operation names",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-47",
+      "summary": "Fix the UserRole enum type definition in backend/migration.mo to ensure it uses proper Motoko variant syntax with #Admin and #Viewer tags",
+      "reqIds": [
+        "REQ-61"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-48",
+      "summary": "Ensure the requireAdmin() function in backend/main.mo correctly extracts and checks the caller's role from the UserProfile, using pattern matching on the UserRole variant and throwing a proper error message when authorization fails",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Ensure the requireAuthenticated() function in backend/main.mo correctly validates that the caller has a valid UserProfile with any role (Admin or Viewer) and throws an error if the profile does not exist",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-50",
+      "summary": "Add proper stable storage migration logic in backend/migration.mo to handle the addition of the role field to existing UserProfile records, defaulting all existing profiles to #Admin role to maintain backward compatibility",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-51",
+      "summary": "Verify that all mutation operations (createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, updateDailyProductionReportById) in backend/main.mo call requireAdmin() at the start of their function bodies before any data modification",
+      "reqIds": [
+        "REQ-65"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-52",
+      "summary": "Verify that all query operations (getProductionEntries, getDispatchEntries, getDailyProductionReports, getDailyProductionReportsByDateRange, getMonthlyProductionSummary) in backend/main.mo call requireAuthenticated() at the start of their function bodies to ensure only logged-in users can view data",
+      "reqIds": [
+        "REQ-66"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-53",
+      "summary": "Ensure the createUserProfile mutation in backend/main.mo properly handles the role parameter from the frontend ProfileSetup component and saves it to the UserProfile record with correct UserRole variant type",
+      "reqIds": [
+        "REQ-67"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Fix any type mismatches between backend/main.mo and backend/migration.mo regarding UserRole and UserProfile types, ensuring consistent type definitions across both files",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-55",
+      "summary": "Fix UserRole type definition in backend/migration.mo to use correct Motoko variant syntax with #Admin and #Viewer constructor tags instead of plain identifiers",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Fix requireAdmin() function in backend/main.mo to use correct pattern matching syntax for UserRole variant, checking for #Admin tag and throwing descriptive error for unauthorized access",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Fix requireAuthenticated() function in backend/main.mo to properly validate caller has a valid UserProfile with any role (#Admin or #Viewer) and throw error if profile does not exist",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Implement stable storage migration logic in backend/migration.mo to safely add role field to existing UserProfile records, defaulting all existing profiles to #Admin role for backward compatibility",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Ensure type consistency between UserRole and UserProfile definitions in both backend/main.mo and backend/migration.mo, using identical type signatures",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-60",
+      "summary": "Fix createUserProfile mutation in backend/main.mo to correctly accept role parameter as UserRole variant (#Admin or #Viewer) from frontend and save it to UserProfile record",
+      "reqIds": [
+        "REQ-74"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-61",
+      "summary": "Verify all mutation operations in backend/main.mo (createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, updateDailyProductionReportById) call requireAdmin() at the start of their function bodies with proper error propagation",
+      "reqIds": [
+        "REQ-75"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Industrial Production Tracker",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
