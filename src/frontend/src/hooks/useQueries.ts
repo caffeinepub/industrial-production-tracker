@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, ProductionEntry, DispatchEntry, ContainerType, ContainerStatus, Shift, DailyProductionReport, MonthlyProductionTotals } from '../backend';
+import type { UserProfile, ProductionEntry, DispatchEntry, ContainerType, ContainerStatus, Shift, DailyProductionReport, MonthlyProductionTotals, MasterOrderStatus, HistoricalOpeningBalance } from '../backend';
 import { toast } from 'sonner';
 
 export function useGetCallerUserProfile() {
@@ -39,6 +39,19 @@ export function useSaveCallerUserProfile() {
     onError: (error: Error) => {
       toast.error(`Failed to save profile: ${error.message}`);
     },
+  });
+}
+
+export function useIsCallerAdmin() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['isCallerAdmin'],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isCallerAdmin();
+    },
+    enabled: !!actor && !isFetching,
   });
 }
 
@@ -549,5 +562,102 @@ export function useOperationComparisonData() {
     },
     enabled: !!actor && !isFetching,
     refetchInterval: 30000,
+  });
+}
+
+export function useGetMasterOrderStatus() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<MasterOrderStatus>({
+    queryKey: ['masterOrderStatus'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getMasterOrderStatus();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUpdateMasterOrderStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      totalManufactured: bigint;
+      totalDispatched: bigint;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateMasterOrderStatus(
+        data.totalManufactured,
+        data.totalDispatched
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['masterOrderStatus'] });
+      toast.success('Master order status updated successfully');
+    },
+    onError: (error: Error) => {
+      const errorMessage = error.message || 'Unknown error';
+      if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
+        toast.error('Access denied: Only admins can update master order status');
+      } else {
+        toast.error(`Failed to update master order: ${errorMessage}`);
+      }
+    },
+  });
+}
+
+export function useHistoricalOpeningBalance() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<HistoricalOpeningBalance | null>({
+    queryKey: ['historicalOpeningBalance'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getHistoricalOpeningBalance();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateHistoricalOpeningBalance() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      openingDate: string;
+      manufacturedBeforeSystem: bigint;
+      dispatchedBeforeSystem: bigint;
+      manufacturingStartDate: string;
+      systemGoLiveDate: string;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.createHistoricalOpeningBalance(
+        data.openingDate,
+        data.manufacturedBeforeSystem,
+        data.dispatchedBeforeSystem,
+        data.manufacturingStartDate,
+        data.systemGoLiveDate
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['historicalOpeningBalance'] });
+      queryClient.invalidateQueries({ queryKey: ['masterOrderStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['dailyProductionReports'] });
+      queryClient.invalidateQueries({ queryKey: ['productionTrendData'] });
+      toast.success('Historical opening balance created successfully');
+    },
+    onError: (error: Error) => {
+      const errorMessage = error.message || 'Unknown error';
+      if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
+        toast.error('Access denied: Only admins can create opening balance');
+      } else if (errorMessage.includes('already exists')) {
+        toast.error('Opening balance already exists. Only one entry is allowed.');
+      } else {
+        toast.error(`Failed to create opening balance: ${errorMessage}`);
+      }
+    },
   });
 }

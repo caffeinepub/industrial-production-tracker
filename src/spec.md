@@ -1,15 +1,16 @@
 # Specification
 
 ## Summary
-**Goal:** Fix role-based access control implementation errors in the backend to enable proper authentication and authorization with Admin and Viewer roles.
+**Goal:** Implement a historical opening balance feature to track pre-system production baseline (344 units manufactured and dispatched before system go-live on 20.02.2026).
 
 **Planned changes:**
-- Fix UserRole type definition in backend/migration.mo to use correct Motoko variant syntax with #Admin and #Viewer tags
-- Fix requireAdmin() function to properly pattern match on UserRole variant and throw authorization errors
-- Fix requireAuthenticated() function to validate caller has a valid UserProfile and throw authentication errors
-- Implement stable storage migration logic to add role field to existing UserProfile records, defaulting to #Admin
-- Ensure type consistency for UserRole and UserProfile definitions between backend/main.mo and backend/migration.mo
-- Fix createUserProfile mutation to correctly accept and store role parameter as UserRole variant
-- Verify all mutation operations call requireAdmin() with proper error propagation
+- Add HistoricalOpeningBalance data type with fixed values: opening date (20.02.2026), manufactured before system (344), dispatched before system (344), manufacturing start date (25.08.2025), system go-live date (22.02.2026)
+- Create backend mutation for admin-only creation of the single immutable opening balance entry
+- Update dashboard totals (Master Order Status) to include opening balance manufactured and dispatched counts
+- Exclude opening balance from monthly target calculations and daily average production metrics
+- Add HistoricalOpeningBalancePage with admin form (when entry doesn't exist) and read-only display (when entry exists)
+- Update ProductionTrendChart to show opening balance as the starting baseline point on the trend line
+- Add navigation link "Opening Balance" in sidebar between Production History and Monthly Target
+- Display informational baseline badge on ProductionDashboardLivePage showing opening balance context
 
-**User-visible outcome:** Users with Admin role can perform all mutation operations, while Viewer role users are properly denied access with clear error messages. Existing user profiles continue to work with Admin privileges after migration.
+**User-visible outcome:** Admins can create a one-time historical opening balance entry that establishes the production baseline before system implementation. Dashboard totals and trend charts automatically include this baseline, while monthly targets remain unaffected. The entry is locked and cannot be edited after creation.

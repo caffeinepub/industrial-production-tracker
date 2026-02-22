@@ -49,13 +49,26 @@ export default {
                     DEFAULT: 'oklch(var(--card))',
                     foreground: 'oklch(var(--card-foreground))'
                 },
+                success: {
+                    DEFAULT: 'oklch(var(--success) / <alpha-value>)',
+                    foreground: 'oklch(var(--success-foreground))'
+                },
+                warning: {
+                    DEFAULT: 'oklch(var(--warning) / <alpha-value>)',
+                    foreground: 'oklch(var(--warning-foreground))'
+                },
                 chart: {
                     1: 'oklch(var(--chart-1))',
                     2: 'oklch(var(--chart-2))',
                     3: 'oklch(var(--chart-3))',
                     4: 'oklch(var(--chart-4))',
                     5: 'oklch(var(--chart-5))'
-                }
+                },
+                navy: '#0f172a',
+                'electric-blue': '#2563eb',
+                'industrial-green': '#22c55e',
+                amber: '#f59e0b',
+                'danger-red': '#ef4444'
             },
             borderRadius: {
                 lg: 'var(--radius)',
@@ -63,10 +76,13 @@ export default {
                 sm: 'calc(var(--radius) - 4px)'
             },
             boxShadow: {
-                xs: '0 1px 2px 0 rgba(0,0,0,0.05)'
+                xs: '0 1px 2px 0 rgba(0,0,0,0.05)',
+                glow: '0 0 20px rgba(37, 99, 235, 0.5)',
+                'glow-lg': '0 0 30px rgba(37, 99, 235, 0.6)'
             },
             fontFamily: {
                 sans: [
+                    'Inter',
                     'system-ui',
                     '-apple-system',
                     'BlinkMacSystemFont',
@@ -85,11 +101,31 @@ export default {
                 'accordion-up': {
                     from: { height: 'var(--radix-accordion-content-height)' },
                     to: { height: '0' }
+                },
+                'fade-in': {
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' }
+                },
+                'slide-up': {
+                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' }
+                },
+                'count-up': {
+                    '0%': { opacity: '0', transform: 'scale(0.5)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' }
+                },
+                'progress-fill': {
+                    '0%': { strokeDashoffset: '1000' },
+                    '100%': { strokeDashoffset: '0' }
                 }
             },
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
-                'accordion-up': 'accordion-up 0.2s ease-out'
+                'accordion-up': 'accordion-up 0.2s ease-out',
+                'fade-in': 'fade-in 0.3s ease-in',
+                'slide-up': 'slide-up 0.4s ease-out',
+                'count-up': 'count-up 0.5s ease-out',
+                'progress-fill': 'progress-fill 1.5s ease-out'
             }
         }
     },

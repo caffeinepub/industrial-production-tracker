@@ -4,9 +4,9 @@
 
 @layer base {
     :root {
-        --radius: 0.5rem;
+        --radius: 0.75rem;
         
-        /* Industrial color palette - Light mode */
+        /* Premium Industrial Dark Theme - Light mode (fallback) */
         --background: 0.98 0 0;
         --foreground: 0.15 0 0;
         
@@ -16,7 +16,7 @@
         --popover: 1 0 0;
         --popover-foreground: 0.15 0 0;
         
-        --primary: 0.25 0 0;
+        --primary: 0.45 0.15 264;
         --primary-foreground: 0.98 0 0;
         
         --secondary: 0.92 0 0;
@@ -25,57 +25,76 @@
         --muted: 0.94 0 0;
         --muted-foreground: 0.50 0 0;
         
-        --accent: 0.92 0 0;
-        --accent-foreground: 0.15 0 0;
+        --accent: 0.55 0.20 264;
+        --accent-foreground: 0.98 0 0;
+        
+        --success: 0.65 0.20 145;
+        --success-foreground: 0.98 0 0;
+        
+        --warning: 0.70 0.18 65;
+        --warning-foreground: 0.15 0 0;
         
         --destructive: 0.577 0.245 27.325;
         --destructive-foreground: 0.98 0 0;
         
         --border: 0.88 0 0;
         --input: 0.88 0 0;
-        --ring: 0.25 0 0;
+        --ring: 0.45 0.15 264;
         
-        --chart-1: 0.646 0.222 41.116;
-        --chart-2: 0.6 0.118 184.704;
-        --chart-3: 0.398 0.07 227.392;
-        --chart-4: 0.828 0.189 84.429;
-        --chart-5: 0.769 0.188 70.08;
+        --chart-1: 0.55 0.20 264;
+        --chart-2: 0.65 0.20 145;
+        --chart-3: 0.70 0.18 65;
+        --chart-4: 0.577 0.245 27.325;
+        --chart-5: 0.45 0.15 220;
     }
 
     .dark {
-        --background: 0.12 0 0;
-        --foreground: 0.95 0 0;
+        /* Premium Industrial Dark Theme - Primary colors */
+        --background: 0.12 0.02 264;
+        --foreground: 0.95 0.01 264;
         
-        --card: 0.18 0 0;
-        --card-foreground: 0.95 0 0;
+        --card: 0.18 0.02 264;
+        --card-foreground: 0.95 0.01 264;
         
-        --popover: 0.18 0 0;
-        --popover-foreground: 0.95 0 0;
+        --popover: 0.20 0.02 264;
+        --popover-foreground: 0.95 0.01 264;
         
-        --primary: 0.85 0 0;
-        --primary-foreground: 0.15 0 0;
+        /* Electric Blue Primary */
+        --primary: 0.55 0.20 264;
+        --primary-foreground: 0.98 0 0;
         
-        --secondary: 0.25 0 0;
-        --secondary-foreground: 0.95 0 0;
+        --secondary: 0.25 0.02 264;
+        --secondary-foreground: 0.95 0.01 264;
         
-        --muted: 0.25 0 0;
-        --muted-foreground: 0.65 0 0;
+        --muted: 0.25 0.02 264;
+        --muted-foreground: 0.65 0.01 264;
         
-        --accent: 0.30 0 0;
-        --accent-foreground: 0.95 0 0;
+        /* Electric Blue Accent */
+        --accent: 0.60 0.22 264;
+        --accent-foreground: 0.98 0 0;
         
-        --destructive: 0.704 0.191 22.216;
-        --destructive-foreground: 0.95 0 0;
+        /* Industrial Green Success */
+        --success: 0.65 0.20 145;
+        --success-foreground: 0.98 0 0;
         
-        --border: 0.30 0 0;
-        --input: 0.30 0 0;
-        --ring: 0.65 0 0;
+        /* Amber Warning */
+        --warning: 0.70 0.18 65;
+        --warning-foreground: 0.15 0 0;
         
-        --chart-1: 0.488 0.243 264.376;
-        --chart-2: 0.696 0.17 162.48;
-        --chart-3: 0.769 0.188 70.08;
-        --chart-4: 0.627 0.265 303.9;
-        --chart-5: 0.645 0.246 16.439;
+        /* Red Danger */
+        --destructive: 0.577 0.245 27.325;
+        --destructive-foreground: 0.98 0 0;
+        
+        --border: 0.30 0.02 264;
+        --input: 0.30 0.02 264;
+        --ring: 0.55 0.20 264;
+        
+        /* Chart colors with industrial palette */
+        --chart-1: 0.55 0.20 264;
+        --chart-2: 0.65 0.20 145;
+        --chart-3: 0.70 0.18 65;
+        --chart-4: 0.577 0.245 27.325;
+        --chart-5: 0.45 0.15 220;
     }
 
     * {
@@ -84,7 +103,129 @@
     
     body {
         @apply bg-background text-foreground;
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-semibold;
+    }
+    
+    /* Premium gradient background */
+    .gradient-bg {
+        background: linear-gradient(135deg, oklch(0.12 0.02 264) 0%, oklch(0.10 0.02 264) 50%, oklch(0.08 0.02 264) 100%);
+    }
+    
+    /* Glass effect card */
+    .glass-card {
+        background: oklch(0.18 0.02 264 / 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid oklch(0.30 0.02 264 / 0.3);
+        box-shadow: 0 8px 32px 0 oklch(0 0 0 / 0.37);
+    }
+    
+    /* Metallic border effect */
+    .metallic-border {
+        border: 1px solid transparent;
+        background: linear-gradient(oklch(0.18 0.02 264), oklch(0.18 0.02 264)) padding-box,
+                    linear-gradient(135deg, oklch(0.40 0.05 264), oklch(0.25 0.02 264), oklch(0.40 0.05 264)) border-box;
+    }
+    
+    /* Table hover effect */
+    .table-row-hover {
+        @apply transition-colors duration-200 hover:bg-accent/10;
+    }
+    
+    /* Animation utilities */
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    .slide-up {
+        animation: slideUp 0.4s ease-out;
+    }
+    
+    .stagger-1 {
+        animation-delay: 0.1s;
+    }
+    
+    .stagger-2 {
+        animation-delay: 0.2s;
+    }
+    
+    .stagger-3 {
+        animation-delay: 0.3s;
+    }
+    
+    .stagger-4 {
+        animation-delay: 0.4s;
+    }
+    
+    /* Button glow effect */
+    .btn-glow {
+        @apply transition-all duration-300;
+    }
+    
+    .btn-glow:hover {
+        box-shadow: 0 0 20px oklch(0.55 0.20 264 / 0.5);
+    }
+    
+    /* Ripple effect */
+    .ripple {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ripple::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: oklch(1 0 0 / 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .ripple:active::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    /* Floating label animation */
+    .floating-label {
+        @apply transition-all duration-200;
+    }
+    
+    .floating-label.active {
+        @apply -translate-y-6 text-xs text-primary;
+    }
+    
+    /* Search box underline animation */
+    .search-underline {
+        position: relative;
+    }
+    
+    .search-underline::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: oklch(var(--primary));
+        transition: width 0.3s ease;
+    }
+    
+    .search-underline:focus-within::after {
+        width: 100%;
+    }
+    
+    /* Responsive table wrapper */
+    .table-responsive {
+        @apply overflow-x-auto;
     }
     
     /* Industrial table styling */
@@ -113,5 +254,93 @@
             @apply text-sm;
             min-height: auto;
         }
+    }
+    
+    /* Keyframe animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    /* Background pattern animation */
+    .animated-bg {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .animated-bg::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, oklch(0.20 0.02 264 / 0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: bgMove 20s linear infinite;
+    }
+    
+    @keyframes bgMove {
+        0% {
+            transform: translate(0, 0);
+        }
+        100% {
+            transform: translate(50px, 50px);
+        }
+    }
+    
+    /* Container watermark */
+    .container-watermark {
+        position: relative;
+    }
+    
+    .container-watermark::before {
+        content: '';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 400px;
+        background-image: url('/assets/generated/shipping-container-logo.dim_120x120.png');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        opacity: 0.03;
+        pointer-events: none;
+        z-index: 0;
     }
 }

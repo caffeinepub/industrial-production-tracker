@@ -8,7 +8,7 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const UserRole__1 = IDL.Variant({
+export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
@@ -29,13 +29,8 @@ export const ContainerStatus = IDL.Variant({
   'pendingOperations' : IDL.Null,
   'underTesting' : IDL.Null,
 });
-export const UserRole = IDL.Variant({
-  'Viewer' : IDL.Null,
-  'Admin' : IDL.Null,
-});
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
-  'role' : UserRole,
   'department' : IDL.Text,
 });
 export const DailyProductionReport = IDL.Record({
@@ -66,6 +61,23 @@ export const ProductionEntry = IDL.Record({
   'statusTime' : Time,
   'shiftDetail' : Shift,
 });
+export const HistoricalOpeningBalance = IDL.Record({
+  'id' : IDL.Nat,
+  'manufacturingStartDate' : IDL.Text,
+  'dispatchedBeforeSystem' : IDL.Nat,
+  'systemGoLiveDate' : IDL.Text,
+  'entryType' : IDL.Text,
+  'openingDate' : IDL.Text,
+  'manufacturedBeforeSystem' : IDL.Nat,
+  'isLocked' : IDL.Bool,
+});
+export const MasterOrderStatus = IDL.Record({
+  'id' : IDL.Nat,
+  'totalDispatched' : IDL.Nat,
+  'totalManufactured' : IDL.Nat,
+  'orderName' : IDL.Text,
+  'totalOrderQuantity' : IDL.Nat,
+});
 export const MonthlyProductionTotals = IDL.Record({
   'month' : IDL.Nat,
   'year' : IDL.Nat,
@@ -78,7 +90,7 @@ export const OperationStatus = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createDailyProductionReport' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
       [IDL.Nat],
@@ -89,13 +101,18 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'createHistoricalOpeningBalance' : IDL.Func(
+      [IDL.Text, IDL.Nat, IDL.Nat, IDL.Text, IDL.Text],
+      [],
+      [],
+    ),
   'createProductionEntry' : IDL.Func(
       [ContainerType, Shift, ContainerStatus, IDL.Nat],
       [IDL.Nat],
       [],
     ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
-  'getCallerUserRole' : IDL.Func([], [UserRole__1], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getContainerStatuses' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(ContainerType, ContainerStatus))],
@@ -131,6 +148,12 @@ export const idlService = IDL.Service({
       [IDL.Vec(ProductionEntry)],
       ['query'],
     ),
+  'getHistoricalOpeningBalance' : IDL.Func(
+      [],
+      [IDL.Opt(HistoricalOpeningBalance)],
+      ['query'],
+    ),
+  'getMasterOrderStatus' : IDL.Func([], [MasterOrderStatus], ['query']),
   'getMonthlyProductionTotals' : IDL.Func(
       [IDL.Nat, IDL.Nat],
       [MonthlyProductionTotals],
@@ -165,13 +188,14 @@ export const idlService = IDL.Service({
       [],
     ),
   'updateDispatchStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+  'updateMasterOrderStatus' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
   'updateProductionStatus' : IDL.Func([IDL.Nat, ContainerStatus], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const UserRole__1 = IDL.Variant({
+  const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
@@ -192,10 +216,8 @@ export const idlFactory = ({ IDL }) => {
     'pendingOperations' : IDL.Null,
     'underTesting' : IDL.Null,
   });
-  const UserRole = IDL.Variant({ 'Viewer' : IDL.Null, 'Admin' : IDL.Null });
   const UserProfile = IDL.Record({
     'name' : IDL.Text,
-    'role' : UserRole,
     'department' : IDL.Text,
   });
   const DailyProductionReport = IDL.Record({
@@ -226,6 +248,23 @@ export const idlFactory = ({ IDL }) => {
     'statusTime' : Time,
     'shiftDetail' : Shift,
   });
+  const HistoricalOpeningBalance = IDL.Record({
+    'id' : IDL.Nat,
+    'manufacturingStartDate' : IDL.Text,
+    'dispatchedBeforeSystem' : IDL.Nat,
+    'systemGoLiveDate' : IDL.Text,
+    'entryType' : IDL.Text,
+    'openingDate' : IDL.Text,
+    'manufacturedBeforeSystem' : IDL.Nat,
+    'isLocked' : IDL.Bool,
+  });
+  const MasterOrderStatus = IDL.Record({
+    'id' : IDL.Nat,
+    'totalDispatched' : IDL.Nat,
+    'totalManufactured' : IDL.Nat,
+    'orderName' : IDL.Text,
+    'totalOrderQuantity' : IDL.Nat,
+  });
   const MonthlyProductionTotals = IDL.Record({
     'month' : IDL.Nat,
     'year' : IDL.Nat,
@@ -238,7 +277,7 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createDailyProductionReport' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
         [IDL.Nat],
@@ -249,13 +288,18 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'createHistoricalOpeningBalance' : IDL.Func(
+        [IDL.Text, IDL.Nat, IDL.Nat, IDL.Text, IDL.Text],
+        [],
+        [],
+      ),
     'createProductionEntry' : IDL.Func(
         [ContainerType, Shift, ContainerStatus, IDL.Nat],
         [IDL.Nat],
         [],
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
-    'getCallerUserRole' : IDL.Func([], [UserRole__1], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getContainerStatuses' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(ContainerType, ContainerStatus))],
@@ -291,6 +335,12 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(ProductionEntry)],
         ['query'],
       ),
+    'getHistoricalOpeningBalance' : IDL.Func(
+        [],
+        [IDL.Opt(HistoricalOpeningBalance)],
+        ['query'],
+      ),
+    'getMasterOrderStatus' : IDL.Func([], [MasterOrderStatus], ['query']),
     'getMonthlyProductionTotals' : IDL.Func(
         [IDL.Nat, IDL.Nat],
         [MonthlyProductionTotals],
@@ -325,6 +375,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateDispatchStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'updateMasterOrderStatus' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
     'updateProductionStatus' : IDL.Func([IDL.Nat, ContainerStatus], [], []),
   });
 };

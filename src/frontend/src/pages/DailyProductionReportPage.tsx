@@ -1,11 +1,9 @@
 import DailyProductionReportForm from '../components/DailyProductionReportForm';
 import DailyProductionReportTable from '../components/DailyProductionReportTable';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
-import AccessDeniedScreen from '../components/AccessDeniedScreen';
-import { UserRole } from '../backend';
+import { useIsCallerAdmin } from '../hooks/useQueries';
 
 export default function DailyProductionReportPage() {
-  const { data: userProfile, isLoading } = useGetCallerUserProfile();
+  const { data: isAdmin, isLoading } = useIsCallerAdmin();
 
   if (isLoading) {
     return (
@@ -14,8 +12,6 @@ export default function DailyProductionReportPage() {
       </div>
     );
   }
-
-  const isAdmin = userProfile?.role === UserRole.Admin;
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">

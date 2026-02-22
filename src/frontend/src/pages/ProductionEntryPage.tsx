@@ -1,10 +1,9 @@
 import ProductionEntryForm from '../components/ProductionEntryForm';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
+import { useIsCallerAdmin } from '../hooks/useQueries';
 import AccessDeniedScreen from '../components/AccessDeniedScreen';
-import { UserRole } from '../backend';
 
 export default function ProductionEntryPage() {
-  const { data: userProfile, isLoading } = useGetCallerUserProfile();
+  const { data: isAdmin, isLoading } = useIsCallerAdmin();
 
   if (isLoading) {
     return (
@@ -14,7 +13,7 @@ export default function ProductionEntryPage() {
     );
   }
 
-  if (!userProfile || userProfile.role !== UserRole.Admin) {
+  if (!isAdmin) {
     return <AccessDeniedScreen />;
   }
 

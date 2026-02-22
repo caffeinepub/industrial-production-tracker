@@ -1,11 +1,15 @@
 import Map "mo:core/Map";
-import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
+import Text "mo:core/Text";
 
 module {
   type OldUserProfile = {
     name : Text;
     department : Text;
+    role : {
+      #Admin;
+      #Viewer;
+    };
   };
 
   type OldActor = {
@@ -15,10 +19,6 @@ module {
   type NewUserProfile = {
     name : Text;
     department : Text;
-    role : {
-      #Admin;
-      #Viewer;
-    };
   };
 
   type NewActor = {
@@ -28,10 +28,7 @@ module {
   public func run(old : OldActor) : NewActor {
     let newUserProfiles = old.userProfiles.map<Principal, OldUserProfile, NewUserProfile>(
       func(_principal, oldProfile) {
-        {
-          oldProfile with
-          role = #Admin;
-        };
+        { name = oldProfile.name; department = oldProfile.department };
       }
     );
     { userProfiles = newUserProfiles };

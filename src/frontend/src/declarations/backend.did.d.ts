@@ -34,6 +34,23 @@ export interface DispatchEntry {
   'containerType' : ContainerType,
   'quantity' : bigint,
 }
+export interface HistoricalOpeningBalance {
+  'id' : bigint,
+  'manufacturingStartDate' : string,
+  'dispatchedBeforeSystem' : bigint,
+  'systemGoLiveDate' : string,
+  'entryType' : string,
+  'openingDate' : string,
+  'manufacturedBeforeSystem' : bigint,
+  'isLocked' : boolean,
+}
+export interface MasterOrderStatus {
+  'id' : bigint,
+  'totalDispatched' : bigint,
+  'totalManufactured' : bigint,
+  'orderName' : string,
+  'totalOrderQuantity' : bigint,
+}
 export interface MonthlyProductionTotals {
   'month' : bigint,
   'year' : bigint,
@@ -59,19 +76,13 @@ export interface Shift {
   'shiftId' : bigint,
 }
 export type Time = bigint;
-export interface UserProfile {
-  'name' : string,
-  'role' : UserRole,
-  'department' : string,
-}
-export type UserRole = { 'Viewer' : null } |
-  { 'Admin' : null };
-export type UserRole__1 = { 'admin' : null } |
+export interface UserProfile { 'name' : string, 'department' : string }
+export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'assignCallerUserRole' : ActorMethod<[Principal, UserRole__1], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createDailyProductionReport' : ActorMethod<
     [string, string, bigint, bigint, bigint, bigint],
     bigint
@@ -80,12 +91,16 @@ export interface _SERVICE {
     [ContainerType, bigint, Time, string, string],
     bigint
   >,
+  'createHistoricalOpeningBalance' : ActorMethod<
+    [string, bigint, bigint, string, string],
+    undefined
+  >,
   'createProductionEntry' : ActorMethod<
     [ContainerType, Shift, ContainerStatus, bigint],
     bigint
   >,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
-  'getCallerUserRole' : ActorMethod<[], UserRole__1>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getContainerStatuses' : ActorMethod<
     [],
     Array<[ContainerType, ContainerStatus]>
@@ -111,6 +126,11 @@ export interface _SERVICE {
     [[] | [ContainerType], [] | [ContainerStatus]],
     Array<ProductionEntry>
   >,
+  'getHistoricalOpeningBalance' : ActorMethod<
+    [],
+    [] | [HistoricalOpeningBalance]
+  >,
+  'getMasterOrderStatus' : ActorMethod<[], MasterOrderStatus>,
   'getMonthlyProductionTotals' : ActorMethod<
     [bigint, bigint],
     MonthlyProductionTotals
@@ -133,6 +153,7 @@ export interface _SERVICE {
     undefined
   >,
   'updateDispatchStatus' : ActorMethod<[bigint, string], undefined>,
+  'updateMasterOrderStatus' : ActorMethod<[bigint, bigint], undefined>,
   'updateProductionStatus' : ActorMethod<[bigint, ContainerStatus], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

@@ -1,11 +1,9 @@
 import DispatchEntryForm from '../components/DispatchEntryForm';
 import DispatchHistoryTable from '../components/DispatchHistoryTable';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
-import AccessDeniedScreen from '../components/AccessDeniedScreen';
-import { UserRole } from '../backend';
+import { useIsCallerAdmin } from '../hooks/useQueries';
 
 export default function DispatchTrackingPage() {
-  const { data: userProfile, isLoading } = useGetCallerUserProfile();
+  const { data: isAdmin, isLoading } = useIsCallerAdmin();
 
   if (isLoading) {
     return (
@@ -14,8 +12,6 @@ export default function DispatchTrackingPage() {
       </div>
     );
   }
-
-  const isAdmin = userProfile?.role === UserRole.Admin;
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
@@ -31,7 +27,7 @@ export default function DispatchTrackingPage() {
         </div>
       )}
       
-      <DispatchHistoryTable isAdmin={isAdmin} />
+      <DispatchHistoryTable isAdmin={isAdmin || false} />
     </div>
   );
 }

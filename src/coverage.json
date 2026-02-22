@@ -1,63 +1,164 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-22T09:29:54.888Z",
+  "generatedAt": "2026-02-22T10:37:21.049Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 0,
+    "total": 16,
+    "implemented": 9,
     "items": [
       {
-        "id": "REQ-69",
-        "summary": "Fix UserRole type definition in backend/migration.mo to use correct Motoko variant syntax with #Admin and #Viewer constructor tags instead of plain identifiers",
+        "id": "REQ-102",
+        "summary": "Create HistoricalOpeningBalance data type in backend/migration.mo with fields: id (Nat), opening_date (Text format '20.02.2026'), manufactured_before_system (Nat value 344), dispatched_before_system (Nat value 344), is_locked (Bool always true), entry_type (Text value 'Historical Opening Balance'), manufacturing_start_date (Text format '25.08.2025'), system_go_live_date (Text format '22.02.2026')",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-70",
-        "summary": "Fix requireAdmin() function in backend/main.mo to use correct pattern matching syntax for UserRole variant, checking for #Admin tag and throwing descriptive error for unauthorized access",
+        "id": "REQ-103",
+        "summary": "Add stable storage variable historicalOpeningBalance in backend/main.mo to store the single opening balance entry, initialized to null until created by admin",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-71",
-        "summary": "Fix requireAuthenticated() function in backend/main.mo to properly validate caller has a valid UserProfile with any role (#Admin or #Viewer) and throw error if profile does not exist",
+        "id": "REQ-104",
+        "summary": "Implement backend mutation function createHistoricalOpeningBalance(opening_date: Text, manufactured_before_system: Nat, dispatched_before_system: Nat, manufacturing_start_date: Text, system_go_live_date: Text) in backend/main.mo that creates the opening balance entry with requireAdmin() authorization, validates opening balance does not already exist, sets is_locked to true, sets entry_type to 'Historical Opening Balance', and stores the entry",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-72",
-        "summary": "Implement stable storage migration logic in backend/migration.mo to safely add role field to existing UserProfile records, defaulting all existing profiles to #Admin role for backward compatibility",
+        "id": "REQ-105",
+        "summary": "Implement backend query function getHistoricalOpeningBalance() in backend/main.mo that returns the historical opening balance entry (or null if not created) with requireAuthenticated() authorization check",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-73",
-        "summary": "Ensure type consistency between UserRole and UserProfile definitions in both backend/main.mo and backend/migration.mo, using identical type signatures",
+        "id": "REQ-106",
+        "summary": "Update backend query function getDailyProductionReportsByDateRange in backend/main.mo to exclude any potential filtering that would hide the opening balance entry, ensuring the opening balance date (20.02.2026) is included in dashboard calculations when querying production data",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-74",
-        "summary": "Fix createUserProfile mutation in backend/main.mo to correctly accept role parameter as UserRole variant (#Admin or #Viewer) from frontend and save it to UserProfile record",
+        "id": "REQ-107",
+        "summary": "Update backend monthly production aggregation logic to exclude the historical opening balance manufactured_before_system value from monthly target calculations and daily average production calculations, ensuring the opening balance is NOT treated as daily production for target tracking purposes",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-75",
-        "summary": "Verify all mutation operations in backend/main.mo (createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, updateDailyProductionReportById) call requireAdmin() at the start of their function bodies with proper error propagation",
+        "id": "REQ-108",
+        "summary": "Update backend getMasterOrderStatus query to include the historical opening balance manufactured_before_system (344) in the base total_manufactured count and dispatched_before_system (344) in the base total_dispatched count, ensuring dashboard totals reflect pre-system production",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
+      },
+      {
+        "id": "REQ-109",
+        "summary": "Create React Query hook useHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that fetches the historical opening balance from the backend getHistoricalOpeningBalance query",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-110",
+        "summary": "Create React Query mutation hook useCreateHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that calls backend createHistoricalOpeningBalance mutation, invalidates relevant queries on success (master order status, production reports, opening balance), displays toast notifications for success/error states, and handles authorization errors gracefully",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-111",
+        "summary": "Create HistoricalOpeningBalanceForm component at frontend/src/components/HistoricalOpeningBalanceForm.tsx for admin users only, with read-only display fields showing Manufacturing Start Date (25.08.2025), System Go-Live Date (22.02.2026), Opening Date (20.02.2026), Manufactured Before System (344), Dispatched Before System (344), a prominent warning message 'This entry cannot be edited after saving', conditional rendering that shows the form only if opening balance does not exist, and a Create Opening Balance button that calls useCreateHistoricalOpeningBalance mutation",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/HistoricalOpeningBalanceForm.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/HistoricalOpeningBalanceForm.tsx"
+        ]
+      },
+      {
+        "id": "REQ-112",
+        "summary": "Create HistoricalOpeningBalanceDisplay component at frontend/src/components/HistoricalOpeningBalanceDisplay.tsx that displays the existing opening balance entry in a read-only premium card format with glass effect styling, showing all fields (Manufacturing Start Date, System Go-Live Date, Opening Date, Manufactured Before System, Dispatched Before System), displaying a locked badge icon with text 'Historical Opening Balance - Locked', and rendering only when opening balance exists",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/HistoricalOpeningBalanceDisplay.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/HistoricalOpeningBalanceDisplay.tsx"
+        ]
+      },
+      {
+        "id": "REQ-113",
+        "summary": "Create HistoricalOpeningBalancePage component at frontend/src/pages/HistoricalOpeningBalancePage.tsx that serves as the container page for opening balance management, conditionally rendering HistoricalOpeningBalanceForm (if no opening balance exists and user is Admin) or HistoricalOpeningBalanceDisplay (if opening balance exists), with page title 'Historical Opening Balance', loading states, and error handling",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/HistoricalOpeningBalancePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/HistoricalOpeningBalancePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-114",
+        "summary": "Add navigation link to HistoricalOpeningBalancePage in the Layout component's sidebar navigation menu at frontend/src/components/Layout.tsx, labeled 'Opening Balance', positioned logically after Production History and before Monthly Target menu items, with appropriate icon (e.g., database or archive icon)",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-115",
+        "summary": "Update ProductionTrendChart component at frontend/src/components/ProductionTrendChart.tsx to include the historical opening balance as the starting baseline point on the production trend line chart, displaying opening_date (20.02.2026) on the x-axis with manufactured_before_system (344) as the y-axis value, ensuring the trend line logically continues from this opening balance baseline to subsequent daily production data points with smooth line continuity",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ProductionTrendChart.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProductionTrendChart.tsx"
+        ]
+      },
+      {
+        "id": "REQ-116",
+        "summary": "Update ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx to display a small informational badge or notice at the top of the page (if opening balance exists) showing 'Baseline: 344 units manufactured before system go-live (20.02.2026)', positioned above the monthly summary cards, with subtle styling consistent with the premium dark theme",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/ProductionDashboardLivePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/ProductionDashboardLivePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-117",
+        "summary": "Update MasterOrderProgressSection component at frontend/src/components/MasterOrderProgressSection.tsx to ensure that summary cards (Total Manufactured, Total Dispatched) automatically include the opening balance values (344 manufactured, 344 dispatched) in their displayed totals by using the updated backend getMasterOrderStatus data that incorporates opening balance",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/MasterOrderProgressSection.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/MasterOrderProgressSection.tsx"
+        ]
       }
     ]
   },
@@ -68,17 +169,22 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/AccessDeniedScreen.tsx",
-    "frontend/src/components/DispatchHistoryTable.tsx",
-    "frontend/src/components/ProductionHistoryDetailTable.tsx",
+    "frontend/src/components/HistoricalOpeningBalanceDisplay.tsx",
+    "frontend/src/components/HistoricalOpeningBalanceForm.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/MasterOrderProgressSection.tsx",
+    "frontend/src/components/ProductionTrendChart.tsx",
     "frontend/src/components/ProfileSetup.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/DailyProductionReportPage.tsx",
     "frontend/src/pages/DispatchTrackingPage.tsx",
+    "frontend/src/pages/HistoricalOpeningBalancePage.tsx",
+    "frontend/src/pages/ProductionDashboardLivePage.tsx",
     "frontend/src/pages/ProductionEntryPage.tsx",
     "frontend/src/pages/ProductionHistoryPage.tsx",
     "project_state.json",

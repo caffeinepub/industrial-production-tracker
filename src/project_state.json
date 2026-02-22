@@ -1,20 +1,21 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 23,
-  "summary": "Responsive industrial production tracking web application for a Shipping Container Manufacturing Unit with role-based access control (Admin/Viewer), admin login, daily data entry, dashboard, history tracking, and dispatch management",
+  "projectStateVersion": 29,
+  "summary": "Premium industrial SaaS production tracking web application with dark theme UI, animated dashboard, collapsible sidebar navigation, modern visual design for shipping container manufacturing with role-based access control, and Master Order Progress tracking system",
   "architectural_notes": [
     "Mobile-first responsive design for smartphone data entry",
-    "Clean industrial dashboard style UI with table layouts and summary cards",
     "Web-based application for shipping container manufacturing tracking",
     "Database schema: Daily_Production_Report table tracks 40ft High Cube container manufacturing with operation-level daily metrics",
     "17 manufacturing operations tracked: Boxing, Welding/Finishing, Rear Wall, Front Wall, Side Wall, Roof, Rear Door, Blasting & Primer, Final Paint, Gasket, DLM, Plywood, Floor Screw, Decal, Data Plate, Sikha, Black Paint",
     "Production Dashboard auto-refreshes data when new entries are submitted",
     "Monthly Production Summary with fixed target of 100 containers and calculated metrics",
     "Production History page allows filtering by date range and editing historical production entries",
-    "Role-based access control: Admin users can add/edit production data, Viewer users can only view dashboard data"
+    "Role-based access control: Admin users can add/edit production data, Viewer users can only view dashboard data",
+    "Premium dark industrial SaaS theme with Deep Navy Blue (#0f172a) primary color and Electric Blue (#2563eb) accents",
+    "Collapsible sidebar navigation with smooth animations and shipping container logo"
   ],
   "known_issues": [],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-implement-admin-authentication-system-with-login-functionality-using-internet-identity-integration",
@@ -347,6 +348,246 @@
         "REQ-58"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-implement-dark-professional-dashboard-theme-with-deep-navy-blue-primary-color-0f172a-electric-blue-secondary-accent-2563eb-industrial-green-success-color-22c55e-amber-warning-color-f59e0b-and-red-danger-color-ef4444-throughout-the-application",
+      "title": "Implement dark professional dashboard theme with Deep Navy Blue primary color (#0f172a), Electric Blue secondary accent (#2563eb), Industrial Green success color (#22c55e), Amber warning color (#f59e0b), and Red danger color (#ef4444) throughout the application",
+      "reqIds": [
+        "REQ-76"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-subtle-gradient-dark-industrial-tone-backgrounds-to-all-pages-add-glass-effect-to-cards-with-slight-blur-and-low-opacity-borders-and-implement-hover-highlight-effects-on-all-tables",
+      "title": "Apply subtle gradient dark industrial tone backgrounds to all pages, add glass effect to cards with slight blur and low opacity borders, and implement hover highlight effects on all tables",
+      "reqIds": [
+        "REQ-77"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-typography-to-use-inter-or-poppins-font-family-with-semi-bold-headings-clean-spacing-and-consistent-padding-throughout-the-application",
+      "title": "Update typography to use Inter or Poppins font family with semi-bold headings, clean spacing, and consistent padding throughout the application",
+      "reqIds": [
+        "REQ-78"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-collapsible-left-sidebar-navigation-with-sticky-top-header-bar-animated-menu-icons-and-shipping-container-silhouette-logo-placeholder",
+      "title": "Create a collapsible left sidebar navigation with sticky top header bar, animated menu icons, and shipping container silhouette logo placeholder",
+      "reqIds": [
+        "REQ-79"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-sidebar-navigation-to-include-menu-items-for-dashboard-daily-entry-dispatch-production-history-monthly-target-and-settings-with-smooth-open-close-animations",
+      "title": "Update sidebar navigation to include menu items for Dashboard, Daily Entry, Dispatch, Production History, Monthly Target, and Settings with smooth open/close animations",
+      "reqIds": [
+        "REQ-80"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-all-summary-cards-total-produced-today-total-despatched-work-in-hand-monthly-progress-with-animated-count-up-numbers-gradient-backgrounds-soft-glow-hover-effects-circular-icons-on-left-side-and-elevation-on-hover",
+      "title": "Upgrade all summary cards (Total Produced Today, Total Despatched, Work in Hand, Monthly Progress %) with animated count-up numbers, gradient backgrounds, soft glow hover effects, circular icons on left side, and elevation on hover",
+      "reqIds": [
+        "REQ-81"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-production-charts-date-vs-production-trend-line-chart-and-operation-wise-comparison-bar-chart-with-smooth-load-animations-rounded-bar-edges-tooltip-hover-effects-gradient-color-fills-and-responsive-resizing",
+      "title": "Upgrade production charts (Date vs Production Trend line chart and Operation-wise Comparison bar chart) with smooth load animations, rounded bar edges, tooltip hover effects, gradient color fills, and responsive resizing",
+      "reqIds": [
+        "REQ-82"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-admin-production-entry-form-with-card-style-container-floating-labels-smooth-input-focus-animations-real-time-animated-auto-calculated-in-hand-field-updates-success-toast-notifications-and-subtle-button-click-micro-interactions",
+      "title": "Enhance Admin Production Entry Form with card-style container, floating labels, smooth input focus animations, real-time animated auto-calculated In Hand field updates, success toast notifications, and subtle button click micro-interactions",
+      "reqIds": [
+        "REQ-83"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-visually-premium-monthly-target-section-with-circular-animated-progress-bar-displaying-percentage-inside-circle-remaining-target-shown-below-daily-average-displayed-in-highlighted-stat-box-and-smooth-progress-animation-on-page-load",
+      "title": "Create visually premium Monthly Target section with circular animated progress bar displaying percentage inside circle, remaining target shown below, daily average displayed in highlighted stat box, and smooth progress animation on page load",
+      "reqIds": [
+        "REQ-84"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-premium-login-page-with-centered-card-layout-gradient-background-subtle-animated-background-pattern-smooth-form-validation-animations-and-role-based-badge-display-showing-admin-or-viewer-status",
+      "title": "Create premium login page with centered card layout, gradient background, subtle animated background pattern, smooth form validation animations, and role-based badge display showing Admin or Viewer status",
+      "reqIds": [
+        "REQ-86"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-smooth-ui-micro-animations-including-fade-in-page-loads-slide-up-card-animations-hover-glow-on-buttons-ripple-click-effects-and-smooth-page-transitions-throughout-the-application",
+      "title": "Implement smooth UI micro-animations including fade-in page loads, slide-up card animations, hover glow on buttons, ripple click effects, and smooth page transitions throughout the application",
+      "reqIds": [
+        "REQ-87"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-fully-responsive-premium-layout-with-mobile-optimized-design-including-collapsible-sidebar-on-mobile-scrollable-responsive-tables-vertically-stacked-dashboard-cards-on-small-screens-and-touch-friendly-buttons",
+      "title": "Ensure fully responsive premium layout with mobile-optimized design including collapsible sidebar on mobile, scrollable responsive tables, vertically stacked dashboard cards on small screens, and touch-friendly buttons",
+      "reqIds": [
+        "REQ-88"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-subtle-industrial-design-elements-including-faint-container-outline-watermark-in-page-backgrounds-thin-metallic-border-accents-on-cards-and-panels-and-industrial-style-icon-set-throughout-the-application",
+      "title": "Add subtle industrial design elements including faint container outline watermark in page backgrounds, thin metallic border accents on cards and panels, and industrial style icon set throughout the application",
+      "reqIds": [
+        "REQ-89"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hook-usemasterorderstatus-in-frontend-src-hooks-usequeries-ts-that-fetches-master-order-data-from-the-backend-getmasterorderstatus-query",
+      "title": "Create React Query hook useMasterOrderStatus in frontend/src/hooks/useQueries.ts that fetches master order data from the backend getMasterOrderStatus query",
+      "reqIds": [
+        "REQ-94"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-mutation-hook-useupdatemasterorderstatus-in-frontend-src-hooks-usequeries-ts-that-calls-backend-updatemasterorderstatus-mutation-invalidates-master-order-queries-on-success-displays-toast-notifications-for-success-error-states-and-handles-authorization-errors-gracefully",
+      "title": "Create React Query mutation hook useUpdateMasterOrderStatus in frontend/src/hooks/useQueries.ts that calls backend updateMasterOrderStatus mutation, invalidates master order queries on success, displays toast notifications for success/error states, and handles authorization errors gracefully",
+      "reqIds": [
+        "REQ-95"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-masterorderprogresssection-component-at-frontend-src-components-masterorderprogresssection-tsx-that-fetches-master-order-data-displays-order-name-and-total-order-quantity-as-header-information-and-implements-auto-calculation-logic-for-remaining-to-produce-total-order-quantity-total-manufactured-finished-stock-total-manufactured-total-dispatched-and-completion-percentage-total-manufactured-total-order-quantity-100",
+      "title": "Create MasterOrderProgressSection component at frontend/src/components/MasterOrderProgressSection.tsx that fetches master order data, displays order name and total order quantity as header information, and implements auto-calculation logic for Remaining to Produce (Total Order Quantity - Total Manufactured), Finished Stock (Total Manufactured - Total Dispatched), and Completion Percentage ((Total Manufactured / Total Order Quantity) × 100)",
+      "reqIds": [
+        "REQ-96"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-circularprogress-component-in-masterorderprogresssection-to-display-the-completion-percentage-with-animated-progress-bar-showing-the-calculated-percentage-value-57-33-for-initial-data-with-total-manufactured-count-total-order-quantity-target-and-remaining-count-displayed",
+      "title": "Integrate CircularProgress component in MasterOrderProgressSection to display the completion percentage with animated progress bar showing the calculated percentage value (57.33% for initial data), with total manufactured count, total order quantity target, and remaining count displayed",
+      "reqIds": [
+        "REQ-97"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-four-summarycard-components-in-masterorderprogresssection-displaying-total-manufactured-shows-total-manufactured-value-total-dispatched-shows-total-dispatched-value-remaining-to-produce-shows-calculated-remaining-value-and-finished-stock-shows-calculated-finished-stock-value-with-appropriate-icons-animated-count-up-numbers-and-gradient-backgrounds-matching-the-existing-premium-dashboard-design",
+      "title": "Create four SummaryCard components in MasterOrderProgressSection displaying: Total Manufactured (shows total_manufactured value), Total Dispatched (shows total_dispatched value), Remaining to Produce (shows calculated remaining value), and Finished Stock (shows calculated finished stock value), with appropriate icons, animated count-up numbers, and gradient backgrounds matching the existing premium dashboard design",
+      "reqIds": [
+        "REQ-98"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-conditional-rendering-in-masterorderprogresssection-that-displays-a-green-badge-with-text-no-pending-dispatch-when-finished-stock-equals-0-calculated-as-total-manufactured-total-dispatched-0-positioned-near-or-below-the-finished-stock-summary-card",
+      "title": "Implement conditional rendering in MasterOrderProgressSection that displays a green badge with text 'No Pending Dispatch' when Finished Stock equals 0 (calculated as Total Manufactured - Total Dispatched = 0), positioned near or below the Finished Stock summary card",
+      "reqIds": [
+        "REQ-99"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-masterorderupdateform-component-at-frontend-src-components-masterorderupdateform-tsx-for-admin-users-only-with-numeric-input-fields-for-total-manufactured-and-total-dispatched-real-time-display-of-auto-calculated-fields-remaining-to-produce-finished-stock-completion-percentage-form-validation-ensuring-non-negative-values-and-submission-handler-using-useupdatemasterorderstatus-mutation-hook",
+      "title": "Create MasterOrderUpdateForm component at frontend/src/components/MasterOrderUpdateForm.tsx for admin users only, with numeric input fields for Total Manufactured and Total Dispatched, real-time display of auto-calculated fields (Remaining to Produce, Finished Stock, Completion Percentage), form validation ensuring non-negative values, and submission handler using useUpdateMasterOrderStatus mutation hook",
+      "reqIds": [
+        "REQ-100"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-masterorderprogresssection-component-into-an-appropriate-page-create-new-masterorderpage-at-frontend-src-pages-masterorderpage-tsx-or-add-to-existing-productiondashboardlivepage-positioning-it-prominently-with-the-masterorderupdateform-component-available-to-admin-users-for-updating-master-order-data",
+      "title": "Integrate MasterOrderProgressSection component into an appropriate page (create new MasterOrderPage at frontend/src/pages/MasterOrderPage.tsx or add to existing ProductionDashboardLivePage), positioning it prominently with the MasterOrderUpdateForm component available to admin users for updating master order data",
+      "reqIds": [
+        "REQ-101"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hook-usehistoricalopeningbalance-in-frontend-src-hooks-usequeries-ts-that-fetches-the-historical-opening-balance-from-the-backend-gethistoricalopeningbalance-query",
+      "title": "Create React Query hook useHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that fetches the historical opening balance from the backend getHistoricalOpeningBalance query",
+      "reqIds": [
+        "REQ-109"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-mutation-hook-usecreatehistoricalopeningbalance-in-frontend-src-hooks-usequeries-ts-that-calls-backend-createhistoricalopeningbalance-mutation-invalidates-relevant-queries-on-success-master-order-status-production-reports-opening-balance-displays-toast-notifications-for-success-error-states-and-handles-authorization-errors-gracefully",
+      "title": "Create React Query mutation hook useCreateHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that calls backend createHistoricalOpeningBalance mutation, invalidates relevant queries on success (master order status, production reports, opening balance), displays toast notifications for success/error states, and handles authorization errors gracefully",
+      "reqIds": [
+        "REQ-110"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-historicalopeningbalanceform-component-at-frontend-src-components-historicalopeningbalanceform-tsx-for-admin-users-only-with-read-only-display-fields-showing-manufacturing-start-date-25-08-2025-system-go-live-date-22-02-2026-opening-date-20-02-2026-manufactured-before-system-344-dispatched-before-system-344-a-prominent-warning-message-this-entry-cannot-be-edited-after-saving-conditional-rendering-that-shows-the-form-only-if-opening-balance-does-not-exist-and-a-create-opening-balance-button-that-calls-usecreatehistoricalopeningbalance-mutation",
+      "title": "Create HistoricalOpeningBalanceForm component at frontend/src/components/HistoricalOpeningBalanceForm.tsx for admin users only, with read-only display fields showing Manufacturing Start Date (25.08.2025), System Go-Live Date (22.02.2026), Opening Date (20.02.2026), Manufactured Before System (344), Dispatched Before System (344), a prominent warning message 'This entry cannot be edited after saving', conditional rendering that shows the form only if opening balance does not exist, and a Create Opening Balance button that calls useCreateHistoricalOpeningBalance mutation",
+      "reqIds": [
+        "REQ-111"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-historicalopeningbalancedisplay-component-at-frontend-src-components-historicalopeningbalancedisplay-tsx-that-displays-the-existing-opening-balance-entry-in-a-read-only-premium-card-format-with-glass-effect-styling-showing-all-fields-manufacturing-start-date-system-go-live-date-opening-date-manufactured-before-system-dispatched-before-system-displaying-a-locked-badge-icon-with-text-historical-opening-balance-locked-and-rendering-only-when-opening-balance-exists",
+      "title": "Create HistoricalOpeningBalanceDisplay component at frontend/src/components/HistoricalOpeningBalanceDisplay.tsx that displays the existing opening balance entry in a read-only premium card format with glass effect styling, showing all fields (Manufacturing Start Date, System Go-Live Date, Opening Date, Manufactured Before System, Dispatched Before System), displaying a locked badge icon with text 'Historical Opening Balance - Locked', and rendering only when opening balance exists",
+      "reqIds": [
+        "REQ-112"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-historicalopeningbalancepage-component-at-frontend-src-pages-historicalopeningbalancepage-tsx-that-serves-as-the-container-page-for-opening-balance-management-conditionally-rendering-historicalopeningbalanceform-if-no-opening-balance-exists-and-user-is-admin-or-historicalopeningbalancedisplay-if-opening-balance-exists-with-page-title-historical-opening-balance-loading-states-and-error-handling",
+      "title": "Create HistoricalOpeningBalancePage component at frontend/src/pages/HistoricalOpeningBalancePage.tsx that serves as the container page for opening balance management, conditionally rendering HistoricalOpeningBalanceForm (if no opening balance exists and user is Admin) or HistoricalOpeningBalanceDisplay (if opening balance exists), with page title 'Historical Opening Balance', loading states, and error handling",
+      "reqIds": [
+        "REQ-113"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-navigation-link-to-historicalopeningbalancepage-in-the-layout-component-s-sidebar-navigation-menu-at-frontend-src-components-layout-tsx-labeled-opening-balance-positioned-logically-after-production-history-and-before-monthly-target-menu-items-with-appropriate-icon-e-g-database-or-archive-icon",
+      "title": "Add navigation link to HistoricalOpeningBalancePage in the Layout component's sidebar navigation menu at frontend/src/components/Layout.tsx, labeled 'Opening Balance', positioned logically after Production History and before Monthly Target menu items, with appropriate icon (e.g., database or archive icon)",
+      "reqIds": [
+        "REQ-114"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-productiontrendchart-component-at-frontend-src-components-productiontrendchart-tsx-to-include-the-historical-opening-balance-as-the-starting-baseline-point-on-the-production-trend-line-chart-displaying-opening-date-20-02-2026-on-the-x-axis-with-manufactured-before-system-344-as-the-y-axis-value-ensuring-the-trend-line-logically-continues-from-this-opening-balance-baseline-to-subsequent-daily-production-data-points-with-smooth-line-continuity",
+      "title": "Update ProductionTrendChart component at frontend/src/components/ProductionTrendChart.tsx to include the historical opening balance as the starting baseline point on the production trend line chart, displaying opening_date (20.02.2026) on the x-axis with manufactured_before_system (344) as the y-axis value, ensuring the trend line logically continues from this opening balance baseline to subsequent daily production data points with smooth line continuity",
+      "reqIds": [
+        "REQ-115"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-productiondashboardlivepage-at-frontend-src-pages-productiondashboardlivepage-tsx-to-display-a-small-informational-badge-or-notice-at-the-top-of-the-page-if-opening-balance-exists-showing-baseline-344-units-manufactured-before-system-go-live-20-02-2026-positioned-above-the-monthly-summary-cards-with-subtle-styling-consistent-with-the-premium-dark-theme",
+      "title": "Update ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx to display a small informational badge or notice at the top of the page (if opening balance exists) showing 'Baseline: 344 units manufactured before system go-live (20.02.2026)', positioned above the monthly summary cards, with subtle styling consistent with the premium dark theme",
+      "reqIds": [
+        "REQ-116"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-masterorderprogresssection-component-at-frontend-src-components-masterorderprogresssection-tsx-to-ensure-that-summary-cards-total-manufactured-total-dispatched-automatically-include-the-opening-balance-values-344-manufactured-344-dispatched-in-their-displayed-totals-by-using-the-updated-backend-getmasterorderstatus-data-that-incorporates-opening-balance",
+      "title": "Update MasterOrderProgressSection component at frontend/src/components/MasterOrderProgressSection.tsx to ensure that summary cards (Total Manufactured, Total Dispatched) automatically include the opening balance values (344 manufactured, 344 dispatched) in their displayed totals by using the updated backend getMasterOrderStatus data that incorporates opening balance",
+      "reqIds": [
+        "REQ-117"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -677,6 +918,198 @@
       "summary": "Verify all mutation operations in backend/main.mo (createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, updateDailyProductionReportById) call requireAdmin() at the start of their function bodies with proper error propagation",
       "reqIds": [
         "REQ-75"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-62",
+      "summary": "Premium Industrial Dark Theme: Apply dark professional dashboard theme with Deep Navy Blue primary (#0f172a), Electric Blue accent (#2563eb), Industrial Green success (#22c55e), Amber warning (#f59e0b), Red danger (#ef4444), gradient backgrounds, glass-effect cards, hover highlights, and Inter/Poppins typography",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-63",
+      "summary": "Modern Layout with Collapsible Sidebar: Implement left collapsible sidebar navigation with animated open/close, sticky top header, animated menu icons, shipping container silhouette logo, and navigation items (Dashboard, Daily Entry, Dispatch, Production History, Monthly Target, Settings)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-64",
+      "summary": "Premium Animated Dashboard Cards: Upgrade summary cards with animated count-up numbers, gradient backgrounds, soft glow hover effect, left-side circular icons, and hover elevation for Total Produced Today, Total Despatched, Work in Hand, and Monthly Progress %",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-65",
+      "summary": "Advanced Animated Charts: Upgrade charts with smooth load animations, rounded bar edges, tooltip hover effects, gradient color fills, and responsive resizing for Date vs Production Trend (smooth curve line chart) and Operation-wise Comparison (modern bar chart)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-66",
+      "summary": "Premium Data Entry Form UI: Enhance Admin Production Entry Form with card-style container, floating labels, smooth input focus animations, real-time animated auto-calculated In Hand field, success toast notifications, and button click micro-interactions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-67",
+      "summary": "Monthly Target Circular Progress UI: Create visually premium Monthly Target section with circular animated progress bar, percentage inside circle, remaining target display below, highlighted daily average stat box, and smooth progress animation on page load",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-68",
+      "summary": "Premium Production History Table: Upgrade table with animated search box, modern date range picker, smooth pagination transitions, icon-based edit buttons, and fade-in modal popup for editing entries",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-69",
+      "summary": "Premium Login & Security UI: Create login page with centered card, gradient background, subtle animated background pattern, smooth form validation animations, and role-based badge display (Admin/Viewer)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-70",
+      "summary": "Micro Animations & UI Effects: Implement subtle professional animations including fade-in page loads, slide-up card animations, hover glow on buttons, ripple click effects, and smooth page transitions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-71",
+      "summary": "Fully Responsive Premium Layout: Ensure mobile-optimized layout with collapsible sidebar on mobile, scrollable responsive tables, vertically stacked dashboard cards, and touch-friendly buttons",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-72",
+      "summary": "Industrial Identity Enhancement: Add subtle industrial design elements including faint container outline watermark in background, thin metallic border accents, and industrial style icon set for premium manufacturing SaaS appearance",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-82",
+      "summary": "Upgrade Production History table with animated search box with underline animation, modern date range picker UI, smooth pagination transitions, edit buttons with icons, and fade-in modal popup for editing entries",
+      "reqIds": [
+        "REQ-85"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-83",
+      "summary": "Create Master_Order_Status database table with fields: order_name, total_order_quantity, total_manufactured, total_dispatched, and implement backend CRUD operations",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-84",
+      "summary": "Build Master Order Progress Section UI with circular animated progress bar showing completion percentage, summary cards for Total Manufactured/Dispatched/Remaining to Produce/Finished Stock, and conditional green badge 'No Pending Dispatch' when Finished Stock = 0",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-85",
+      "summary": "Implement auto-calculation logic for: Remaining to Produce (Total Order - Total Manufactured), Finished Stock (Total Manufactured - Total Dispatched), Completion Percentage ((Total Manufactured / Total Order) × 100)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-86",
+      "summary": "Initialize Master_Order_Status with default order 'First Lot – 600 Units' with total_order_quantity=600, total_manufactured=344, total_dispatched=344",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-87",
+      "summary": "Create Master_Order_Status database table in backend/main.mo with fields: id (Nat), order_name (Text), total_order_quantity (Nat), total_manufactured (Nat), total_dispatched (Nat), using stable storage for data persistence across canister upgrades",
+      "reqIds": [
+        "REQ-90"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-88",
+      "summary": "Initialize Master_Order_Status with default entry: order_name = 'First Lot – 600 Units', total_order_quantity = 600, total_manufactured = 344, total_dispatched = 344 during system initialization",
+      "reqIds": [
+        "REQ-91"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-89",
+      "summary": "Implement backend query function getMasterOrderStatus() in backend/main.mo that returns the current master order entry with requireAuthenticated() authorization check",
+      "reqIds": [
+        "REQ-92"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-90",
+      "summary": "Implement backend mutation function updateMasterOrderStatus(total_manufactured: Nat, total_dispatched: Nat) in backend/main.mo that updates the master order entry with requireAdmin() authorization check and validates non-negative values",
+      "reqIds": [
+        "REQ-93"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-91",
+      "summary": "Historical Opening Balance Feature",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-92",
+      "summary": "Create HistoricalOpeningBalance data type in backend/migration.mo with fields: id (Nat), opening_date (Text format '20.02.2026'), manufactured_before_system (Nat value 344), dispatched_before_system (Nat value 344), is_locked (Bool always true), entry_type (Text value 'Historical Opening Balance'), manufacturing_start_date (Text format '25.08.2025'), system_go_live_date (Text format '22.02.2026')",
+      "reqIds": [
+        "REQ-102"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-93",
+      "summary": "Add stable storage variable historicalOpeningBalance in backend/main.mo to store the single opening balance entry, initialized to null until created by admin",
+      "reqIds": [
+        "REQ-103"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-94",
+      "summary": "Implement backend mutation function createHistoricalOpeningBalance(opening_date: Text, manufactured_before_system: Nat, dispatched_before_system: Nat, manufacturing_start_date: Text, system_go_live_date: Text) in backend/main.mo that creates the opening balance entry with requireAdmin() authorization, validates opening balance does not already exist, sets is_locked to true, sets entry_type to 'Historical Opening Balance', and stores the entry",
+      "reqIds": [
+        "REQ-104"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-95",
+      "summary": "Implement backend query function getHistoricalOpeningBalance() in backend/main.mo that returns the historical opening balance entry (or null if not created) with requireAuthenticated() authorization check",
+      "reqIds": [
+        "REQ-105"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-96",
+      "summary": "Update backend query function getDailyProductionReportsByDateRange in backend/main.mo to exclude any potential filtering that would hide the opening balance entry, ensuring the opening balance date (20.02.2026) is included in dashboard calculations when querying production data",
+      "reqIds": [
+        "REQ-106"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-97",
+      "summary": "Update backend monthly production aggregation logic to exclude the historical opening balance manufactured_before_system value from monthly target calculations and daily average production calculations, ensuring the opening balance is NOT treated as daily production for target tracking purposes",
+      "reqIds": [
+        "REQ-107"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-98",
+      "summary": "Update backend getMasterOrderStatus query to include the historical opening balance manufactured_before_system (344) in the base total_manufactured count and dispatched_before_system (344) in the base total_dispatched count, ensuring dashboard totals reflect pre-system production",
+      "reqIds": [
+        "REQ-108"
       ],
       "status": "pending"
     }

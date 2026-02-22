@@ -1,115 +1,128 @@
 import { useMemo } from 'react';
-import { useGetDailyProductionReportsByDate, useMonthlyProductionSummary } from '../hooks/useQueries';
+import { useGetDailyProductionReportsByDate, useMonthlyProductionSummary, useHistoricalOpeningBalance } from '../hooks/useQueries';
 import LiveProductionTable from '../components/LiveProductionTable';
 import ProductionTrendChart from '../components/ProductionTrendChart';
 import OperationComparisonChart from '../components/OperationComparisonChart';
 import SummaryCard from '../components/SummaryCard';
-import { Factory, Truck, Package, Target, TrendingDown, Percent, Calendar } from 'lucide-react';
+import MasterOrderProgressSection from '../components/MasterOrderProgressSection';
+import MasterOrderUpdateForm from '../components/MasterOrderUpdateForm';
+import { Factory, Truck, Package, Target, TrendingDown, Calendar, Info } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default function ProductionDashboardLivePage() {
   const today = new Date().toISOString().split('T')[0];
-  const { data: reports, isLoading } = useGetDailyProductionReportsByDate(today);
-  const { data: monthlySummary, isLoading: monthlyLoading } = useMonthlyProductionSummary();
+  const { data: todayReports = [], isLoading: reportsLoading } = useGetDailyProductionReportsByDate(today);
+  const { data: monthlySummary, isLoading: summaryLoading } = useMonthlyProductionSummary();
+  const { data: openingBalance } = useHistoricalOpeningBalance();
 
-  const summaryStats = useMemo(() => {
-    if (!reports || reports.length === 0) {
-      return {
-        totalProducedToday: 0,
-        totalDespatched: 0,
-        totalInHand: 0,
-      };
-    }
+  const todayTotal = useMemo(() => {
+    return todayReports.reduce((sum, report) => sum + Number(report.todayProduction), 0);
+  }, [todayReports]);
 
-    return {
-      totalProducedToday: reports.reduce((sum, report) => sum + Number(report.todayProduction), 0),
-      totalDespatched: reports.reduce((sum, report) => sum + Number(report.despatched), 0),
-      totalInHand: reports.reduce((sum, report) => sum + Number(report.inHand), 0),
-    };
-  }, [reports]);
+  const totalInHand = useMemo(() => {
+    return todayReports.reduce((sum, report) => sum + Number(report.inHand), 0);
+  }, [todayReports]);
 
-  const formattedDate = new Date(today).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const totalDispatched = useMemo(() => {
+    return todayReports.reduce((sum, report) => sum + Number(report.despatched), 0);
+  }, [todayReports]);
+
+  const isLoading = reportsLoading || summaryLoading;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Production Dashboard</h1>
-        <p className="text-muted-foreground mt-1">
-          Live production metrics for {formattedDate}
-        </p>
-      </div>
-
-      {/* Monthly Production Summary */}
-      <div className="space-y-3">
-        <h2 className="text-2xl font-bold">Monthly Target Progress (Target: 100 Containers)</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard
-            title="Total Containers Produced This Month"
-            value={monthlyLoading ? '...' : monthlySummary?.totalProduced ?? 0}
-            icon={Target}
-            description="Cumulative production for current month"
-          />
-          <SummaryCard
-            title="Remaining to Achieve Target"
-            value={monthlyLoading ? '...' : monthlySummary?.remainingToTarget ?? 0}
-            icon={TrendingDown}
-            description="Containers needed to reach monthly goal"
-          />
-          <SummaryCard
-            title="Production Completion Percentage"
-            value={monthlyLoading ? '...' : `${monthlySummary?.completionPercentage.toFixed(1) ?? 0}%`}
-            icon={Percent}
-            description="Progress towards monthly target"
-          />
-          <SummaryCard
-            title="Daily Average Production"
-            value={monthlyLoading ? '...' : monthlySummary?.dailyAverage.toFixed(1) ?? 0}
-            icon={Calendar}
-            description="Average containers per day this month"
-          />
+    <div className="space-y-8 pb-8">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+            Production Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-2 flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Real-time production metrics and analytics
+          </p>
         </div>
       </div>
 
-      {/* Daily Production Summary */}
-      <div className="space-y-3">
-        <h2 className="text-2xl font-bold">Daily Production Summary</h2>
-        <div className="grid gap-4 md:grid-cols-3">
+      {/* Opening Balance Badge */}
+      {openingBalance && (
+        <div className="slide-up" style={{ animationDelay: '0.05s' }}>
+          <Badge className="glass-card metallic-border px-6 py-3 text-sm font-medium bg-accent/20 border-accent/30 hover:bg-accent/30">
+            <Info className="w-4 h-4 mr-2" />
+            Baseline: {Number(openingBalance.manufacturedBeforeSystem).toLocaleString()} units manufactured before system go-live ({formatDate(openingBalance.openingDate)})
+          </Badge>
+        </div>
+      )}
+
+      {/* Master Order Progress Section */}
+      <div className="slide-up" style={{ animationDelay: '0.1s' }}>
+        <MasterOrderProgressSection />
+      </div>
+
+      {/* Master Order Update Form (Admin Only) */}
+      <div className="slide-up" style={{ animationDelay: '0.2s' }}>
+        <MasterOrderUpdateForm />
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="slide-up" style={{ animationDelay: '0.3s' }}>
           <SummaryCard
-            title="Total Container Produced Today"
-            value={summaryStats.totalProducedToday}
+            title="Today's Production"
+            value={todayTotal}
             icon={Factory}
-            description="Containers completed across all operations"
+            description="Units produced today"
           />
+        </div>
+        <div className="slide-up" style={{ animationDelay: '0.4s' }}>
           <SummaryCard
-            title="Total Container Despatched"
-            value={summaryStats.totalDespatched}
-            icon={Truck}
-            description="Containers shipped to customers"
+            title="Monthly Target"
+            value={`${monthlySummary?.completionPercentage.toFixed(1) || 0}%`}
+            icon={Target}
+            description={`${monthlySummary?.totalProduced || 0} / ${monthlySummary?.monthlyTarget || 0} units`}
           />
+        </div>
+        <div className="slide-up" style={{ animationDelay: '0.5s' }}>
           <SummaryCard
-            title="Total Work in Hand"
-            value={summaryStats.totalInHand}
+            title="Total In Hand"
+            value={totalInHand}
             icon={Package}
-            description="Containers in production pipeline"
+            description="Units ready for dispatch"
+          />
+        </div>
+        <div className="slide-up" style={{ animationDelay: '0.6s' }}>
+          <SummaryCard
+            title="Total Dispatched"
+            value={totalDispatched}
+            icon={Truck}
+            description="Units shipped"
           />
         </div>
       </div>
 
-      {/* Production Charts */}
-      <div className="space-y-3">
-        <h2 className="text-2xl font-bold">Production Analytics</h2>
-        <div className="grid gap-4 lg:grid-cols-2">
+      {/* Live Production Table */}
+      <div className="slide-up" style={{ animationDelay: '0.7s' }}>
+        <LiveProductionTable reports={todayReports} isLoading={isLoading} date={today} />
+      </div>
+
+      {/* Analytics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="slide-up" style={{ animationDelay: '0.8s' }}>
           <ProductionTrendChart />
+        </div>
+        <div className="slide-up" style={{ animationDelay: '0.9s' }}>
           <OperationComparisonChart />
         </div>
       </div>
-
-      {/* Production Table */}
-      <LiveProductionTable reports={reports || []} isLoading={isLoading} date={today} />
     </div>
   );
 }

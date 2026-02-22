@@ -4,13 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserRole } from '../backend';
 
 export default function ProfileSetup() {
   const [name, setName] = useState('');
   const [department, setDepartment] = useState('');
-  const [role, setRole] = useState<UserRole>(UserRole.Admin);
   const saveProfile = useSaveCallerUserProfile();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -18,8 +15,7 @@ export default function ProfileSetup() {
     if (name.trim() && department.trim()) {
       saveProfile.mutate({ 
         name: name.trim(), 
-        department: department.trim(),
-        role: role
+        department: department.trim()
       });
     }
   };
@@ -30,7 +26,7 @@ export default function ProfileSetup() {
         <DialogHeader>
           <DialogTitle>Welcome! Set up your profile</DialogTitle>
           <DialogDescription>
-            Please provide your name, department, and role to continue.
+            Please provide your name and department to continue.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,21 +50,6 @@ export default function ProfileSetup() {
               placeholder="e.g., Production, Quality Control"
               required
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="role">Role *</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-              <SelectTrigger id="role">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={UserRole.Admin}>Admin</SelectItem>
-                <SelectItem value={UserRole.Viewer}>Viewer</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Admin: Can add/edit production data. Viewer: Can only view dashboard.
-            </p>
           </div>
           <Button
             type="submit"

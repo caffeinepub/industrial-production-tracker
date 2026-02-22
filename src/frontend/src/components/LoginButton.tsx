@@ -33,7 +33,7 @@ export default function LoginButton() {
       disabled={disabled}
       variant={isAuthenticated ? 'outline' : 'default'}
       size="sm"
-      className="gap-2"
+      className="gap-2 btn-glow ripple"
     >
       {disabled ? (
         <>

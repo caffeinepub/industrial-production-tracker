@@ -1,148 +1,338 @@
 {
   "kind": "build_request",
-  "title": "Fix role-based access control implementation errors",
+  "title": "Implement Historical Opening Balance Feature for Production Tracking System",
   "projectName": "Container Production Tracker",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-69",
-      "text": "Fix UserRole type definition in backend/migration.mo to use correct Motoko variant syntax with #Admin and #Viewer constructor tags instead of plain identifiers",
+      "id": "REQ-102",
+      "text": "Create HistoricalOpeningBalance data type in backend/migration.mo with fields: id (Nat), opening_date (Text format '20.02.2026'), manufactured_before_system (Nat value 344), dispatched_before_system (Nat value 344), is_locked (Bool always true), entry_type (Text value 'Historical Opening Balance'), manufacturing_start_date (Text format '25.08.2025'), system_go_live_date (Text format '22.02.2026')",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Deployment error",
-          "Type definition issues with the UserRole enum in Motoko"
+          "Opening Date: 20.02.2026",
+          "Manufactured Before System: 344",
+          "Dispatched Before System: 344",
+          "Manufacturing Start Date: 25.08.2025",
+          "System Go-Live Date: 22.02.2026"
         ]
       },
       "acceptanceCriteria": [
-        "UserRole type in backend/migration.mo uses proper variant syntax: type UserRole = {#Admin; #Viewer;}",
-        "No compilation errors related to UserRole type definition"
+        "HistoricalOpeningBalance type defined with all specified fields",
+        "Type includes is_locked field defaulting to true",
+        "Type includes entry_type field marked as 'Historical Opening Balance'"
       ]
     },
     {
-      "id": "REQ-70",
-      "text": "Fix requireAdmin() function in backend/main.mo to use correct pattern matching syntax for UserRole variant, checking for #Admin tag and throwing descriptive error for unauthorized access",
+      "id": "REQ-103",
+      "text": "Add stable storage variable historicalOpeningBalance in backend/main.mo to store the single opening balance entry, initialized to null until created by admin",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Authorization function implementation problems"
+          "Create an Opening Balance Entry"
         ]
       },
       "acceptanceCriteria": [
-        "requireAdmin() correctly pattern matches on UserRole variant using switch statement or case expression",
-        "Function throws error with message 'Unauthorized: Admin role required' when caller has #Viewer role",
-        "Function allows execution to continue when caller has #Admin role"
+        "Stable var historicalOpeningBalance declared as ?HistoricalOpeningBalance",
+        "Variable persists across canister upgrades",
+        "Initial value is null"
       ]
     },
     {
-      "id": "REQ-71",
-      "text": "Fix requireAuthenticated() function in backend/main.mo to properly validate caller has a valid UserProfile with any role (#Admin or #Viewer) and throw error if profile does not exist",
+      "id": "REQ-104",
+      "text": "Implement backend mutation function createHistoricalOpeningBalance(opening_date: Text, manufactured_before_system: Nat, dispatched_before_system: Nat, manufacturing_start_date: Text, system_go_live_date: Text) in backend/main.mo that creates the opening balance entry with requireAdmin() authorization, validates opening balance does not already exist, sets is_locked to true, sets entry_type to 'Historical Opening Balance', and stores the entry",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Authorization function implementation problems"
+          "Create an Opening Balance Entry with:",
+          "Opening Date: 20.02.2026",
+          "Manufactured Before System: 344",
+          "Dispatched Before System: 344"
         ]
       },
       "acceptanceCriteria": [
-        "requireAuthenticated() retrieves caller's UserProfile from stable storage",
-        "Function throws error with message 'Unauthorized: Authentication required' when profile is null or missing",
-        "Function allows execution to continue when valid profile exists with any role"
+        "Function requires Admin role authorization",
+        "Function validates that historicalOpeningBalance is null before creating",
+        "Function throws error if opening balance already exists",
+        "Entry is created with is_locked = true and cannot be modified",
+        "Entry is stored in stable storage"
       ]
     },
     {
-      "id": "REQ-72",
-      "text": "Implement stable storage migration logic in backend/migration.mo to safely add role field to existing UserProfile records, defaulting all existing profiles to #Admin role for backward compatibility",
+      "id": "REQ-105",
+      "text": "Implement backend query function getHistoricalOpeningBalance() in backend/main.mo that returns the historical opening balance entry (or null if not created) with requireAuthenticated() authorization check",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Stable storage migration issues when adding the new role field to existing UserProfile records"
+          "Dashboard totals must include this opening balance"
         ]
       },
       "acceptanceCriteria": [
-        "Migration function checks if UserProfile records exist without role field",
-        "All existing UserProfile records are updated with role field set to #Admin",
-        "Migration preserves all other UserProfile data (name, department, principal)",
-        "New UserProfile records use the role value provided during creation"
+        "Function requires authenticated user",
+        "Function returns ?HistoricalOpeningBalance type",
+        "Function returns the stored opening balance or null"
       ]
     },
     {
-      "id": "REQ-73",
-      "text": "Ensure type consistency between UserRole and UserProfile definitions in both backend/main.mo and backend/migration.mo, using identical type signatures",
+      "id": "REQ-106",
+      "text": "Update backend query function getDailyProductionReportsByDateRange in backend/main.mo to exclude any potential filtering that would hide the opening balance entry, ensuring the opening balance date (20.02.2026) is included in dashboard calculations when querying production data",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Type consistency between main.mo and migration.mo"
+          "Dashboard totals must include this opening balance"
         ]
       },
       "acceptanceCriteria": [
-        "UserRole type definition is identical in both backend/main.mo and backend/migration.mo",
-        "UserProfile type definition is identical in both files including the role field type",
-        "No type mismatch compilation errors between main actor and migration module"
+        "Opening balance date is treated as valid production date",
+        "Date range queries properly include opening balance when applicable"
       ]
     },
     {
-      "id": "REQ-74",
-      "text": "Fix createUserProfile mutation in backend/main.mo to correctly accept role parameter as UserRole variant (#Admin or #Viewer) from frontend and save it to UserProfile record",
+      "id": "REQ-107",
+      "text": "Update backend monthly production aggregation logic to exclude the historical opening balance manufactured_before_system value from monthly target calculations and daily average production calculations, ensuring the opening balance is NOT treated as daily production for target tracking purposes",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Ensure the createUserProfile mutation in backend/main.mo properly handles the role parameter"
+          "Monthly target calculations must NOT treat this as daily production"
         ]
       },
       "acceptanceCriteria": [
-        "createUserProfile function signature includes role parameter of type UserRole",
-        "Function correctly stores the role value in the UserProfile record",
-        "No type conversion errors when saving UserRole variant to stable storage"
+        "Monthly target calculations ignore opening balance quantities",
+        "Daily average production calculations ignore opening balance",
+        "Only actual daily production entries are counted toward monthly targets"
       ]
     },
     {
-      "id": "REQ-75",
-      "text": "Verify all mutation operations in backend/main.mo (createProductionEntry, updateProductionEntry, deleteProductionEntry, createDispatchEntry, updateDispatchStatus, createDailyProductionReport, updateDailyProductionReport, updateDailyProductionReportById) call requireAdmin() at the start of their function bodies with proper error propagation",
+      "id": "REQ-108",
+      "text": "Update backend getMasterOrderStatus query to include the historical opening balance manufactured_before_system (344) in the base total_manufactured count and dispatched_before_system (344) in the base total_dispatched count, ensuring dashboard totals reflect pre-system production",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Proper error handling for authorization failures"
+          "Dashboard totals must include this opening balance"
         ]
       },
       "acceptanceCriteria": [
-        "Each mutation function calls requireAdmin() as the first statement",
-        "Authorization errors are properly propagated to the caller",
-        "Functions return appropriate error responses when authorization fails"
+        "Master Order Status total_manufactured includes opening balance manufactured count",
+        "Master Order Status total_dispatched includes opening balance dispatched count",
+        "Dashboard summary cards reflect opening balance in totals"
+      ]
+    },
+    {
+      "id": "REQ-109",
+      "text": "Create React Query hook useHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that fetches the historical opening balance from the backend getHistoricalOpeningBalance query",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Generate full backend + frontend implementation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Hook fetches opening balance data using React Query",
+        "Hook returns loading, error, and data states",
+        "Hook is properly typed with TypeScript"
+      ]
+    },
+    {
+      "id": "REQ-110",
+      "text": "Create React Query mutation hook useCreateHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that calls backend createHistoricalOpeningBalance mutation, invalidates relevant queries on success (master order status, production reports, opening balance), displays toast notifications for success/error states, and handles authorization errors gracefully",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Generate full backend + frontend implementation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Mutation hook calls backend createHistoricalOpeningBalance",
+        "Hook invalidates master order and production queries on success",
+        "Success/error toast notifications are displayed",
+        "Authorization errors show user-friendly messages"
+      ]
+    },
+    {
+      "id": "REQ-111",
+      "text": "Create HistoricalOpeningBalanceForm component at frontend/src/components/HistoricalOpeningBalanceForm.tsx for admin users only, with read-only display fields showing Manufacturing Start Date (25.08.2025), System Go-Live Date (22.02.2026), Opening Date (20.02.2026), Manufactured Before System (344), Dispatched Before System (344), a prominent warning message 'This entry cannot be edited after saving', conditional rendering that shows the form only if opening balance does not exist, and a Create Opening Balance button that calls useCreateHistoricalOpeningBalance mutation",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Opening Date: 20.02.2026",
+          "Manufactured Before System: 344",
+          "Dispatched Before System: 344",
+          "This entry cannot be edited after saving",
+          "Manufacturing Start Date: 25.08.2025",
+          "System Go-Live Date: 22.02.2026"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Form displays all opening balance fields as read-only with fixed values",
+        "Form is only visible to Admin users",
+        "Form is hidden if opening balance already exists",
+        "Warning message about non-editable entry is prominently displayed",
+        "Create button is disabled during submission",
+        "Success toast confirms entry creation"
+      ]
+    },
+    {
+      "id": "REQ-112",
+      "text": "Create HistoricalOpeningBalanceDisplay component at frontend/src/components/HistoricalOpeningBalanceDisplay.tsx that displays the existing opening balance entry in a read-only premium card format with glass effect styling, showing all fields (Manufacturing Start Date, System Go-Live Date, Opening Date, Manufactured Before System, Dispatched Before System), displaying a locked badge icon with text 'Historical Opening Balance - Locked', and rendering only when opening balance exists",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Mark this entry as 'Historical Opening Balance'",
+          "This entry cannot be edited after saving"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Component displays opening balance data in premium card UI",
+        "Locked badge clearly indicates entry cannot be edited",
+        "Component uses existing glass-effect card styling",
+        "Component renders only when opening balance data exists"
+      ]
+    },
+    {
+      "id": "REQ-113",
+      "text": "Create HistoricalOpeningBalancePage component at frontend/src/pages/HistoricalOpeningBalancePage.tsx that serves as the container page for opening balance management, conditionally rendering HistoricalOpeningBalanceForm (if no opening balance exists and user is Admin) or HistoricalOpeningBalanceDisplay (if opening balance exists), with page title 'Historical Opening Balance', loading states, and error handling",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Generate full backend + frontend implementation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Page displays form for Admin users when opening balance does not exist",
+        "Page displays read-only view when opening balance exists",
+        "Page shows loading skeleton during data fetch",
+        "Page handles errors gracefully with error messages"
+      ]
+    },
+    {
+      "id": "REQ-114",
+      "text": "Add navigation link to HistoricalOpeningBalancePage in the Layout component's sidebar navigation menu at frontend/src/components/Layout.tsx, labeled 'Opening Balance', positioned logically after Production History and before Monthly Target menu items, with appropriate icon (e.g., database or archive icon)",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Generate full backend + frontend implementation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigation link appears in sidebar menu",
+        "Link is positioned between Production History and Monthly Target",
+        "Link uses appropriate icon consistent with sidebar design",
+        "Link navigates to HistoricalOpeningBalancePage"
+      ]
+    },
+    {
+      "id": "REQ-115",
+      "text": "Update ProductionTrendChart component at frontend/src/components/ProductionTrendChart.tsx to include the historical opening balance as the starting baseline point on the production trend line chart, displaying opening_date (20.02.2026) on the x-axis with manufactured_before_system (344) as the y-axis value, ensuring the trend line logically continues from this opening balance baseline to subsequent daily production data points with smooth line continuity",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Production trend graph should logically continue from this base"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Opening balance appears as first data point on trend chart",
+        "Chart x-axis shows opening date (20.02.2026)",
+        "Chart y-axis shows manufactured total (344) for opening balance",
+        "Trend line smoothly continues from opening balance to daily production data",
+        "Chart legend or tooltip clearly indicates opening balance point"
+      ]
+    },
+    {
+      "id": "REQ-116",
+      "text": "Update ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx to display a small informational badge or notice at the top of the page (if opening balance exists) showing 'Baseline: 344 units manufactured before system go-live (20.02.2026)', positioned above the monthly summary cards, with subtle styling consistent with the premium dark theme",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Dashboard totals must include this opening balance",
+          "Opening Date: 20.02.2026",
+          "Manufactured Before System: 344"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Badge displays opening balance information when it exists",
+        "Badge is positioned prominently at top of dashboard",
+        "Badge styling matches premium dark theme aesthetic",
+        "Badge clearly communicates baseline production context"
+      ]
+    },
+    {
+      "id": "REQ-117",
+      "text": "Update MasterOrderProgressSection component at frontend/src/components/MasterOrderProgressSection.tsx to ensure that summary cards (Total Manufactured, Total Dispatched) automatically include the opening balance values (344 manufactured, 344 dispatched) in their displayed totals by using the updated backend getMasterOrderStatus data that incorporates opening balance",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "Dashboard totals must include this opening balance"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Total Manufactured card includes opening balance in count",
+        "Total Dispatched card includes opening balance in count",
+        "No frontend calculation required - relies on backend totals",
+        "Cards display correct totals reflecting opening balance"
       ]
     }
   ],
   "constraints": [
-    "Maintain single-actor architecture with all logic in backend/main.mo",
-    "Preserve all existing stable storage data during migration",
-    "Do not modify frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts",
-    "Ensure backward compatibility with existing UserProfile records"
+    "Historical opening balance entry must be immutable after creation - no edit or delete functionality",
+    "Only one opening balance entry can exist in the system",
+    "Opening balance must not affect monthly target calculations or daily average production metrics",
+    "Opening balance must be included in dashboard total production and dispatch counts",
+    "All opening balance dates and values are fixed: Opening Date (20.02.2026), Manufactured (344), Dispatched (344), Manufacturing Start (25.08.2025), System Go-Live (22.02.2026)"
   ],
   "nonGoals": [
-    "Adding new authorization roles beyond Admin and Viewer",
-    "Implementing fine-grained permission controls",
-    "Adding audit logging for authorization failures",
-    "Changing the frontend role selection UI"
+    "Allowing multiple opening balance entries",
+    "Editing or deleting the opening balance after creation",
+    "Including opening balance in monthly production target tracking",
+    "User-configurable opening balance dates or quantities",
+    "Importing historical production data beyond the opening balance"
   ],
   "imageRequirements": {
     "required": [],

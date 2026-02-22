@@ -1,47 +1,65 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-22T09:29:54.884Z",
-  "summary": "The diff implements role-based access control (RBAC) fixes for a Motoko backend canister and TypeScript frontend. Backend changes include fixing UserRole variant syntax, implementing requireAdmin/requireAuthenticated authorization functions, adding stable storage migration, and protecting mutations. Frontend changes integrate role checking into UI components, showing/hiding admin features and providing access denied screens. All 7 requirements (REQ-69 through REQ-75) appear to be addressed.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-22T10:37:21.042Z",
+  "summary": "The implementation includes backend data structures, storage variables, query/mutation functions, frontend React Query hooks, UI components (form, display, page), navigation integration, and chart updates. However, several critical requirements are partially implemented or missing: backend authorization/validation logic is truncated, monthly aggregation exclusion logic is not evident, and master order status calculation updates are unclear.",
+  "missing_requirements": [
     {
-      "description": "Added AccessDeniedScreen component (frontend/src/components/AccessDeniedScreen.tsx)",
-      "reason": "This new UI component with logout functionality was not requested in any requirement. The BuildRequest focused on backend fixes and did not specify adding new frontend screens for access denial.",
+      "id": "REQ-102",
+      "requirement": "Create HistoricalOpeningBalance data type in backend/migration.mo with all specified fields",
+      "reason": "The HistoricalOpeningBalance type is defined in backend/main.mo, not in backend/migration.mo as specified. The migration.mo file only contains old user profile migration logic.",
       "evidence": [
-        "frontend/src/components/AccessDeniedScreen.tsx"
+        "backend/migration.mo",
+        "backend/main.mo"
       ]
     },
     {
-      "description": "Added comprehensive error handling with toast notifications for authorization failures in frontend hooks",
-      "reason": "REQ-75 mentions proper error propagation but the BuildRequest explicitly states in non-goals: Adding audit logging for authorization failures. The diff adds detailed toast error messages like Access denied: Only admins can create production entries which goes beyond basic error propagation.",
+      "id": "REQ-104",
+      "requirement": "Implement backend mutation function createHistoricalOpeningBalance with full validation and error handling",
+      "reason": "The backend/main.mo file is truncated at the createHistoricalOpeningBalance function implementation. Cannot verify if validation logic (checks for null, throws error if already exists) is complete.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts"
+        "backend/main.mo"
       ]
     },
     {
-      "description": "Modified multiple frontend pages to conditionally render UI based on role (ProductionEntryPage, DispatchTrackingPage, DailyProductionReportPage, ProductionHistoryPage)",
-      "reason": "The BuildRequest constraint explicitly states Do not modify frontend role selection UI and non-goals include Changing the frontend role selection UI. While these are not role selection changes per se, extensive UI conditional rendering based on roles was not requested in any requirement.",
+      "id": "REQ-106",
+      "requirement": "Update backend query function getDailyProductionReportsByDateRange to ensure opening balance date is included in queries",
+      "reason": "No evidence in the diff of modifications to getDailyProductionReportsByDateRange function. Cannot confirm opening balance date handling is implemented.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-107",
+      "requirement": "Update backend monthly production aggregation logic to exclude opening balance from monthly target and daily average calculations",
+      "reason": "No evidence in the diff of changes to monthly production aggregation functions. The logic to exclude opening balance from target calculations is not visible.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-108",
+      "requirement": "Update backend getMasterOrderStatus query to include opening balance in total_manufactured and total_dispatched counts",
+      "reason": "No evidence in the diff showing updates to getMasterOrderStatus function logic. The initial masterOrderStatus variable shows hardcoded values (344) but no dynamic calculation based on historicalOpeningBalance storage.",
       "evidence": [
-        "frontend/src/pages/ProductionEntryPage.tsx",
-        "frontend/src/pages/DispatchTrackingPage.tsx",
-        "frontend/src/pages/DailyProductionReportPage.tsx",
-        "frontend/src/pages/ProductionHistoryPage.tsx"
+        "backend/main.mo"
       ]
     }
   ],
-  "confidence": 0.85,
+  "hallucinated_features": [],
+  "confidence": 0.65,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/AccessDeniedScreen.tsx",
-    "frontend/src/components/DispatchHistoryTable.tsx",
-    "frontend/src/components/ProductionHistoryDetailTable.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/HistoricalOpeningBalanceDisplay.tsx",
+    "frontend/src/components/HistoricalOpeningBalanceForm.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/MasterOrderProgressSection.tsx",
+    "frontend/src/components/ProductionTrendChart.tsx",
     "frontend/src/components/ProfileSetup.tsx",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/DailyProductionReportPage.tsx",
     "frontend/src/pages/DispatchTrackingPage.tsx",
+    "frontend/src/pages/HistoricalOpeningBalancePage.tsx",
+    "frontend/src/pages/ProductionDashboardLivePage.tsx",
     "frontend/src/pages/ProductionEntryPage.tsx",
     "frontend/src/pages/ProductionHistoryPage.tsx",
     "project_state.json"

@@ -8,24 +8,19 @@ import Order "mo:core/Order";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
+import Migration "migration";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
 
 (with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  public type UserRole = {
-    #Admin;
-    #Viewer;
-  };
-
   public type UserProfile = {
     name : Text;
     department : Text;
-    role : UserRole;
   };
 
   public type ContainerType = {
@@ -88,6 +83,25 @@ actor {
     totalContainers : Nat;
   };
 
+  public type MasterOrderStatus = {
+    id : Nat;
+    orderName : Text;
+    totalOrderQuantity : Nat;
+    totalManufactured : Nat;
+    totalDispatched : Nat;
+  };
+
+  public type HistoricalOpeningBalance = {
+    id : Nat;
+    openingDate : Text;
+    manufacturedBeforeSystem : Nat;
+    dispatchedBeforeSystem : Nat;
+    isLocked : Bool;
+    entryType : Text;
+    manufacturingStartDate : Text;
+    systemGoLiveDate : Text;
+  };
+
   let userProfiles = Map.empty<Principal, UserProfile>();
   let productionEntries = Map.empty<Nat, ProductionEntry>();
   let dispatchEntries = Map.empty<Nat, DispatchEntry>();
@@ -117,8 +131,20 @@ actor {
     "Black Paint",
   ];
 
+  var masterOrderStatus : MasterOrderStatus = {
+    id = 0;
+    orderName = "First Lot – 600 Units";
+    totalOrderQuantity = 600;
+    totalManufactured = 344;
+    totalDispatched = 344;
+  };
+
+  var historicalOpeningBalance : ?HistoricalOpeningBalance = null;
+
   public shared ({ caller }) func initializeProductionReports() : async () {
-    await requireAdmin(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
 
     for ((i, operation) in initialOperations.enumerate()) {
       let report : DailyProductionReport = {
@@ -134,198 +160,40 @@ actor {
     };
   };
 
-  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    userProfiles.get(caller);
-  };
-
-  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
-    userProfiles.get(user);
-  };
-
-  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    userProfiles.add(caller, profile);
-  };
-
-  func requireAdmin(caller : Principal) : async () {
-    let userProfile = getCallerUserProfileAndThrow(caller);
-    switch (userProfile.role) {
-      case (#Admin) {
-        ();
-      };
-      case (_) {
-        Runtime.trap("Unauthorized: Only admins can perform this action");
-      };
-    };
-  };
-
-  func requireAuthenticated(_caller : Principal) : () {
-    ignore getCallerUserProfileAndThrow(_caller);
-  };
-
-  func getCallerUserProfileAndThrow(caller : Principal) : UserProfile {
-    if (caller.isAnonymous()) {
-      Runtime.trap("Anonymous callers are not allowed. Please authenticate first.");
-    };
-    switch (userProfiles.get(caller)) {
-      case (null) {
-        Runtime.trap("No user profile found for this principal. Please authenticate or create a profile first");
-      };
-      case (?profile) { profile };
-    };
-  };
-
-  public shared ({ caller }) func createProductionEntry(containerType : ContainerType, shiftDetail : Shift, status : ContainerStatus, totalQty : Nat) : async Nat {
-    await requireAdmin(caller);
-
-    let entry = {
-      entryId = nextProductionId;
-      containerType;
-      shiftDetail;
-      totalQty;
-      status;
-      statusTime = Time.now();
-      createdAt = Time.now();
-      modifiedAt = Time.now();
+  public shared ({ caller }) func createHistoricalOpeningBalance(openingDate : Text, manufacturedBeforeSystem : Nat, dispatchedBeforeSystem : Nat, manufacturingStartDate : Text, systemGoLiveDate : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
-    productionEntries.add(nextProductionId, entry);
-    nextProductionId += 1;
-    entry.entryId;
-  };
-
-  public shared ({ caller }) func createDispatchEntry(containerType : ContainerType, quantity : Nat, dispatchDate : Time.Time, destination : Text, deliveryStatus : Text) : async Nat {
-    await requireAdmin(caller);
-
-    let entry = {
-      dispatchId = nextDispatchId;
-      containerType;
-      quantity;
-      dispatchDate;
-      destination;
-      deliveryStatus;
-      createdAt = Time.now();
+    if (historicalOpeningBalance != null) {
+      Runtime.trap("Historical opening balance already exists. Only one entry is allowed.");
     };
 
-    dispatchEntries.add(nextDispatchId, entry);
-    nextDispatchId += 1;
-    entry.dispatchId;
-  };
-
-  public shared ({ caller }) func updateProductionStatus(entryId : Nat, newStatus : ContainerStatus) : async () {
-    await requireAdmin(caller);
-
-    switch (productionEntries.get(entryId)) {
-      case (null) { Runtime.trap("Production entry not found") };
-      case (?entry) {
-        let updatedEntry = {
-          entryId = entry.entryId;
-          containerType = entry.containerType;
-          shiftDetail = entry.shiftDetail;
-          totalQty = entry.totalQty;
-          status = newStatus;
-          statusTime = Time.now();
-          createdAt = entry.createdAt;
-          modifiedAt = Time.now();
-        };
-
-        productionEntries.add(entryId, updatedEntry);
-      };
-    };
-  };
-
-  public shared ({ caller }) func updateDispatchStatus(dispatchId : Nat, newStatus : Text) : async () {
-    await requireAdmin(caller);
-
-    switch (dispatchEntries.get(dispatchId)) {
-      case (null) { Runtime.trap("Dispatch entry not found") };
-      case (?entry) {
-        let updatedEntry = {
-          dispatchId = entry.dispatchId;
-          containerType = entry.containerType;
-          quantity = entry.quantity;
-          dispatchDate = entry.dispatchDate;
-          destination = entry.destination;
-          deliveryStatus = newStatus;
-          createdAt = entry.createdAt;
-        };
-        dispatchEntries.add(dispatchId, updatedEntry);
-      };
-    };
-  };
-
-  public shared ({ caller }) func createDailyProductionReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async Nat {
-    await requireAdmin(caller);
-
-    let report : DailyProductionReport = {
-      id = nextReportId;
-      date;
-      operationName;
-      todayProduction;
-      totalCompleted;
-      despatched;
-      inHand;
+    let balance : HistoricalOpeningBalance = {
+      id = 0;
+      openingDate;
+      manufacturedBeforeSystem;
+      dispatchedBeforeSystem;
+      isLocked = true;
+      entryType = "Historical Opening Balance";
+      manufacturingStartDate;
+      systemGoLiveDate;
     };
 
-    dailyProductionReports.add(nextReportId, report);
-    nextReportId += 1;
-    report.id;
+    historicalOpeningBalance := ?balance;
   };
 
-  public shared ({ caller }) func updateDailyProductionReport(_id : Nat, _todayProduction : Nat, _totalCompleted : Nat, _despatched : Nat, _inHand : Nat) : async () {
-    Runtime.trap("This update function is deprecated! Please call `updateDailyProductionReportById` instead.");
-  };
-
-  public shared ({ caller }) func updateDailyProductionReportById(reportId : Nat, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async () {
-    await requireAdmin(caller);
-    switch (dailyProductionReports.get(reportId)) {
-      case (null) {
-        Runtime.trap("Production report with ID " # reportId.toText() # " not found");
-      };
-      case (?existingReport) {
-        let updatedReport = {
-          id = existingReport.id;
-          date = existingReport.date;
-          operationName = existingReport.operationName;
-          todayProduction;
-          totalCompleted;
-          despatched;
-          inHand;
-        };
-        dailyProductionReports.add(reportId, updatedReport);
-      };
+  public query ({ caller }) func getHistoricalOpeningBalance() : async ?HistoricalOpeningBalance {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
     };
-  };
-
-  public shared ({ caller }) func submitOrUpdateDailyReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async Nat {
-    await requireAdmin(caller);
-
-    let existingReportId = findReportId(date, operationName);
-
-    switch (existingReportId) {
-      case (null) {
-        let reportId = await createDailyProductionReport(date, operationName, todayProduction, totalCompleted, despatched, inHand);
-        reportId;
-      };
-      case (?id) {
-        await updateDailyProductionReportById(id, todayProduction, totalCompleted, despatched, inHand);
-        id;
-      };
-    };
-  };
-
-  func findReportId(date : Text, operationName : Text) : ?Nat {
-    for ((id, report) in dailyProductionReports.entries()) {
-      if (Text.equal(report.date, date) and Text.equal(report.operationName, operationName)) {
-        return ?id;
-      };
-    };
-    null;
+    historicalOpeningBalance;
   };
 
   public query ({ caller }) func getDailyProductionReportsByOperation(operationName : Text) : async [DailyProductionReport] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     let allReports = dailyProductionReports.values().toArray();
     allReports.filter(
       func(report) {
@@ -335,6 +203,9 @@ actor {
   };
 
   public query ({ caller }) func getDailyProductionReportsByDate(date : Text) : async [DailyProductionReport] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     let allReports = dailyProductionReports.values().toArray();
     allReports.filter(
       func(report) {
@@ -344,6 +215,9 @@ actor {
   };
 
   public query ({ caller }) func getDailyProductionReportsByDateRange(startDate : Text, endDate : Text) : async [DailyProductionReport] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     let filteredReports = List.empty<DailyProductionReport>();
 
     for ((_, report) in dailyProductionReports.entries()) {
@@ -362,10 +236,16 @@ actor {
   };
 
   public query ({ caller }) func getOperationWorkloadSummary() : async [OperationStatus] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     List.empty<OperationStatus>().toArray();
   };
 
   public query ({ caller }) func getContainerStatuses() : async [(ContainerType, ContainerStatus)] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     let statuses = List.empty<(ContainerType, ContainerStatus)>();
     for ((_, entry) in productionEntries.entries()) {
       statuses.add((entry.containerType, entry.status));
@@ -374,6 +254,9 @@ actor {
   };
 
   public query ({ caller }) func getDailyProductionByStatus() : async [(ContainerType, ContainerStatus, Nat)] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     let results = List.empty<(ContainerType, ContainerStatus, Nat)>();
     for ((_, entry) in productionEntries.entries()) {
       results.add((entry.containerType, entry.status, entry.totalQty));
@@ -382,6 +265,9 @@ actor {
   };
 
   public query ({ caller }) func getFilteredProductionEntries(containerType : ?ContainerType, status : ?ContainerStatus) : async [ProductionEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     let allEntries = productionEntries.values().toArray();
     let filteredEntries = allEntries.filter(
       func(entry) {
@@ -408,10 +294,217 @@ actor {
   };
 
   public query ({ caller }) func getDispatchEntriesByDate(_rangeStart : Time.Time, _rangeEnd : Time.Time) : async [DispatchEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     dispatchEntries.values().toArray();
   };
 
   public query ({ caller }) func getMonthlyProductionTotals(year : Nat, month : Nat) : async MonthlyProductionTotals {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
     { year; month; totalContainers = 0 };
+  };
+
+  public query ({ caller }) func getMasterOrderStatus() : async MasterOrderStatus {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
+    masterOrderStatus;
+  };
+
+  public shared ({ caller }) func updateMasterOrderStatus(totalManufactured : Nat, totalDispatched : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    masterOrderStatus := {
+      masterOrderStatus with
+      totalManufactured;
+      totalDispatched;
+    };
+  };
+
+  public shared ({ caller }) func createProductionEntry(containerType : ContainerType, shiftDetail : Shift, status : ContainerStatus, totalQty : Nat) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    let entry = {
+      entryId = nextProductionId;
+      containerType;
+      shiftDetail;
+      totalQty;
+      status;
+      statusTime = Time.now();
+      createdAt = Time.now();
+      modifiedAt = Time.now();
+    };
+
+    productionEntries.add(nextProductionId, entry);
+    nextProductionId += 1;
+    entry.entryId;
+  };
+
+  public shared ({ caller }) func createDispatchEntry(containerType : ContainerType, quantity : Nat, dispatchDate : Time.Time, destination : Text, deliveryStatus : Text) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    let entry = {
+      dispatchId = nextDispatchId;
+      containerType;
+      quantity;
+      dispatchDate;
+      destination;
+      deliveryStatus;
+      createdAt = Time.now();
+    };
+
+    dispatchEntries.add(nextDispatchId, entry);
+    nextDispatchId += 1;
+    entry.dispatchId;
+  };
+
+  public shared ({ caller }) func updateProductionStatus(entryId : Nat, newStatus : ContainerStatus) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    switch (productionEntries.get(entryId)) {
+      case (null) { Runtime.trap("Production entry not found") };
+      case (?entry) {
+        let updatedEntry = {
+          entryId = entry.entryId;
+          containerType = entry.containerType;
+          shiftDetail = entry.shiftDetail;
+          totalQty = entry.totalQty;
+          status = newStatus;
+          statusTime = Time.now();
+          createdAt = entry.createdAt;
+          modifiedAt = Time.now();
+        };
+
+        productionEntries.add(entryId, updatedEntry);
+      };
+    };
+  };
+
+  public shared ({ caller }) func updateDispatchStatus(dispatchId : Nat, newStatus : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    switch (dispatchEntries.get(dispatchId)) {
+      case (null) { Runtime.trap("Dispatch entry not found") };
+      case (?entry) {
+        let updatedEntry = {
+          dispatchId = entry.dispatchId;
+          containerType = entry.containerType;
+          quantity = entry.quantity;
+          dispatchDate = entry.dispatchDate;
+          destination = entry.destination;
+          deliveryStatus = newStatus;
+          createdAt = entry.createdAt;
+        };
+        dispatchEntries.add(dispatchId, updatedEntry);
+      };
+    };
+  };
+
+  public shared ({ caller }) func createDailyProductionReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    let report : DailyProductionReport = {
+      id = nextReportId;
+      date;
+      operationName;
+      todayProduction;
+      totalCompleted;
+      despatched;
+      inHand;
+    };
+
+    dailyProductionReports.add(nextReportId, report);
+    nextReportId += 1;
+    report.id;
+  };
+
+  public shared ({ caller }) func updateDailyProductionReport(_id : Nat, _todayProduction : Nat, _totalCompleted : Nat, _despatched : Nat, _inHand : Nat) : async () {
+    Runtime.trap("This update function is deprecated! Please call `updateDailyProductionReportById` instead.");
+  };
+
+  public shared ({ caller }) func updateDailyProductionReportById(reportId : Nat, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    switch (dailyProductionReports.get(reportId)) {
+      case (null) {
+        Runtime.trap("Production report with ID " # reportId.toText() # " not found");
+      };
+      case (?existingReport) {
+        let updatedReport = {
+          id = existingReport.id;
+          date = existingReport.date;
+          operationName = existingReport.operationName;
+          todayProduction;
+          totalCompleted;
+          despatched;
+          inHand;
+        };
+        dailyProductionReports.add(reportId, updatedReport);
+      };
+    };
+  };
+
+  public shared ({ caller }) func submitOrUpdateDailyReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, despatched : Nat, inHand : Nat) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    let existingReportId = findReportId(date, operationName);
+
+    switch (existingReportId) {
+      case (null) {
+        let reportId = await createDailyProductionReport(date, operationName, todayProduction, totalCompleted, despatched, inHand);
+        reportId;
+      };
+      case (?id) {
+        await updateDailyProductionReportById(id, todayProduction, totalCompleted, despatched, inHand);
+        id;
+      };
+    };
+  };
+
+  func findReportId(date : Text, operationName : Text) : ?Nat {
+    for ((id, report) in dailyProductionReports.entries()) {
+      if (Text.equal(report.date, date) and Text.equal(report.operationName, operationName)) {
+        return ?id;
+      };
+    };
+    null;
+  };
+
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access profiles");
+    };
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    userProfiles.add(caller, profile);
   };
 };

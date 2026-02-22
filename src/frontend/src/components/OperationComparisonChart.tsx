@@ -9,112 +9,112 @@ export default function OperationComparisonChart() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Operation-wise Production Comparison
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[300px] w-full" />
-        </CardContent>
-      </Card>
+      <div className="glass-card metallic-border rounded-lg p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Operation-wise Comparison</h3>
+        </div>
+        <Skeleton className="h-[300px] w-full" />
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Operation-wise Production Comparison
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            Failed to load operation comparison data
-          </div>
-        </CardContent>
-      </Card>
+      <div className="glass-card metallic-border rounded-lg p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Operation-wise Comparison</h3>
+        </div>
+        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+          Failed to load operation comparison data
+        </div>
+      </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Operation-wise Production Comparison
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            No operation comparison data available
-          </div>
-        </CardContent>
-      </Card>
+      <div className="glass-card metallic-border rounded-lg p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Operation-wise Comparison</h3>
+        </div>
+        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+          No operation comparison data available
+        </div>
+      </div>
     );
   }
 
-  // Define colors for bars using chart color tokens
   const barColors = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
+    'oklch(0.55 0.20 264)',
+    'oklch(0.65 0.20 145)',
+    'oklch(0.70 0.18 65)',
+    'oklch(0.577 0.245 27.325)',
+    'oklch(0.45 0.15 220)',
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-primary" />
-          Operation-wise Production Comparison
-        </CardTitle>
-        <p className="text-sm text-muted-foreground mt-1">
-          Total production output by operation
-        </p>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 60 }}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey="operation"
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              interval={0}
-            />
-            <YAxis
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              label={{ value: 'Production Quantity', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))' } }}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'hsl(var(--popover))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '0.5rem',
-                color: 'hsl(var(--popover-foreground))',
-              }}
-              labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
-            />
-            <Legend />
-            <Bar dataKey="production" name="Production Quantity" radius={[4, 4, 0, 0]}>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    <div className="glass-card metallic-border rounded-lg p-6">
+      <div className="flex items-center gap-2 mb-2">
+        <BarChart3 className="h-5 w-5 text-primary" />
+        <h3 className="text-lg font-semibold">Operation-wise Comparison</h3>
+      </div>
+      <p className="text-sm text-muted-foreground mb-4">
+        Total production output by operation
+      </p>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 60 }}>
+          <defs>
+            {barColors.map((color, index) => (
+              <linearGradient key={index} id={`barGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={1} />
+                <stop offset="100%" stopColor={color} stopOpacity={0.6} />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.30 0.02 264)" opacity={0.3} />
+          <XAxis
+            dataKey="operation"
+            angle={-45}
+            textAnchor="end"
+            height={100}
+            className="text-xs"
+            tick={{ fill: 'oklch(0.65 0.01 264)' }}
+            stroke="oklch(0.30 0.02 264)"
+            interval={0}
+          />
+          <YAxis
+            className="text-xs"
+            tick={{ fill: 'oklch(0.65 0.01 264)' }}
+            stroke="oklch(0.30 0.02 264)"
+            label={{ value: 'Production Quantity', angle: -90, position: 'insideLeft', style: { fill: 'oklch(0.65 0.01 264)' } }}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'oklch(0.20 0.02 264)',
+              border: '1px solid oklch(0.30 0.02 264)',
+              borderRadius: '0.5rem',
+              color: 'oklch(0.95 0.01 264)',
+            }}
+            labelStyle={{ color: 'oklch(0.95 0.01 264)' }}
+          />
+          <Legend />
+          <Bar
+            dataKey="production"
+            name="Production Quantity"
+            radius={[8, 8, 0, 0]}
+            isAnimationActive={true}
+            animationDuration={1000}
+            animationEasing="ease-out"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={`url(#barGradient${index % barColors.length})`} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

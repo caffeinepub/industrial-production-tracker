@@ -1,4 +1,177 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-create-react-query-hook-usehistoricalopeningbalance-in-frontend-src-hooks-usequeries-ts-that-fetches-the-historical-opening-balance-from-the-backend-gethistoricalopeningbalance-query",
+      "featureTitle": "Create React Query hook useHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that fetches the historical opening balance from the backend getHistoricalOpeningBalance query",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-109"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-react-query-mutation-hook-usecreatehistoricalopeningbalance-in-frontend-src-hooks-usequeries-ts-that-calls-backend-createhistoricalopeningbalance-mutation-invalidates-relevant-queries-on-success-master-order-status-production-reports-opening-balance-displays-toast-notifications-for-success-error-states-and-handles-authorization-errors-gracefully",
+      "featureTitle": "Create React Query mutation hook useCreateHistoricalOpeningBalance in frontend/src/hooks/useQueries.ts that calls backend createHistoricalOpeningBalance mutation, invalidates relevant queries on success (master order status, production reports, opening balance), displays toast notifications for success/error states, and handles authorization errors gracefully",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-110"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-historicalopeningbalanceform-component-at-frontend-src-components-historicalopeningbalanceform-tsx-for-admin-users-only-with-read-only-display-fields-showing-manufacturing-start-date-25-08-2025-system-go-live-date-22-02-2026-opening-date-20-02-2026-manufactured-before-system-344-dispatched-before-system-344-a-prominent-warning-message-this-entry-cannot-be-edited-after-saving-conditional-rendering-that-shows-the-form-only-if-opening-balance-does-not-exist-and-a-create-opening-balance-button-that-calls-usecreatehistoricalopeningbalance-mutation",
+      "featureTitle": "Create HistoricalOpeningBalanceForm component at frontend/src/components/HistoricalOpeningBalanceForm.tsx for admin users only, with read-only display fields showing Manufacturing Start Date (25.08.2025), System Go-Live Date (22.02.2026), Opening Date (20.02.2026), Manufactured Before System (344), Dispatched Before System (344), a prominent warning message 'This entry cannot be edited after saving', conditional rendering that shows the form only if opening balance does not exist, and a Create Opening Balance button that calls useCreateHistoricalOpeningBalance mutation",
+      "files": [
+        "frontend/src/components/HistoricalOpeningBalanceForm.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-111"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-historicalopeningbalancedisplay-component-at-frontend-src-components-historicalopeningbalancedisplay-tsx-that-displays-the-existing-opening-balance-entry-in-a-read-only-premium-card-format-with-glass-effect-styling-showing-all-fields-manufacturing-start-date-system-go-live-date-opening-date-manufactured-before-system-dispatched-before-system-displaying-a-locked-badge-icon-with-text-historical-opening-balance-locked-and-rendering-only-when-opening-balance-exists",
+      "featureTitle": "Create HistoricalOpeningBalanceDisplay component at frontend/src/components/HistoricalOpeningBalanceDisplay.tsx that displays the existing opening balance entry in a read-only premium card format with glass effect styling, showing all fields (Manufacturing Start Date, System Go-Live Date, Opening Date, Manufactured Before System, Dispatched Before System), displaying a locked badge icon with text 'Historical Opening Balance - Locked', and rendering only when opening balance exists",
+      "files": [
+        "frontend/src/components/HistoricalOpeningBalanceDisplay.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-112"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-historicalopeningbalancepage-component-at-frontend-src-pages-historicalopeningbalancepage-tsx-that-serves-as-the-container-page-for-opening-balance-management-conditionally-rendering-historicalopeningbalanceform-if-no-opening-balance-exists-and-user-is-admin-or-historicalopeningbalancedisplay-if-opening-balance-exists-with-page-title-historical-opening-balance-loading-states-and-error-handling",
+      "featureTitle": "Create HistoricalOpeningBalancePage component at frontend/src/pages/HistoricalOpeningBalancePage.tsx that serves as the container page for opening balance management, conditionally rendering HistoricalOpeningBalanceForm (if no opening balance exists and user is Admin) or HistoricalOpeningBalanceDisplay (if opening balance exists), with page title 'Historical Opening Balance', loading states, and error handling",
+      "files": [
+        "frontend/src/pages/HistoricalOpeningBalancePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-113"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-navigation-link-to-historicalopeningbalancepage-in-the-layout-component-s-sidebar-navigation-menu-at-frontend-src-components-layout-tsx-labeled-opening-balance-positioned-logically-after-production-history-and-before-monthly-target-menu-items-with-appropriate-icon-e-g-database-or-archive-icon",
+      "featureTitle": "Add navigation link to HistoricalOpeningBalancePage in the Layout component's sidebar navigation menu at frontend/src/components/Layout.tsx, labeled 'Opening Balance', positioned logically after Production History and before Monthly Target menu items, with appropriate icon (e.g., database or archive icon)",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Layout.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-114"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-productiontrendchart-component-at-frontend-src-components-productiontrendchart-tsx-to-include-the-historical-opening-balance-as-the-starting-baseline-point-on-the-production-trend-line-chart-displaying-opening-date-20-02-2026-on-the-x-axis-with-manufactured-before-system-344-as-the-y-axis-value-ensuring-the-trend-line-logically-continues-from-this-opening-balance-baseline-to-subsequent-daily-production-data-points-with-smooth-line-continuity",
+      "featureTitle": "Update ProductionTrendChart component at frontend/src/components/ProductionTrendChart.tsx to include the historical opening balance as the starting baseline point on the production trend line chart, displaying opening_date (20.02.2026) on the x-axis with manufactured_before_system (344) as the y-axis value, ensuring the trend line logically continues from this opening balance baseline to subsequent daily production data points with smooth line continuity",
+      "files": [
+        "frontend/src/components/ProductionTrendChart.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-115"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-productiondashboardlivepage-at-frontend-src-pages-productiondashboardlivepage-tsx-to-display-a-small-informational-badge-or-notice-at-the-top-of-the-page-if-opening-balance-exists-showing-baseline-344-units-manufactured-before-system-go-live-20-02-2026-positioned-above-the-monthly-summary-cards-with-subtle-styling-consistent-with-the-premium-dark-theme",
+      "featureTitle": "Update ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx to display a small informational badge or notice at the top of the page (if opening balance exists) showing 'Baseline: 344 units manufactured before system go-live (20.02.2026)', positioned above the monthly summary cards, with subtle styling consistent with the premium dark theme",
+      "files": [
+        "frontend/src/pages/ProductionDashboardLivePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-116"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-masterorderprogresssection-component-at-frontend-src-components-masterorderprogresssection-tsx-to-ensure-that-summary-cards-total-manufactured-total-dispatched-automatically-include-the-opening-balance-values-344-manufactured-344-dispatched-in-their-displayed-totals-by-using-the-updated-backend-getmasterorderstatus-data-that-incorporates-opening-balance",
+      "featureTitle": "Update MasterOrderProgressSection component at frontend/src/components/MasterOrderProgressSection.tsx to ensure that summary cards (Total Manufactured, Total Dispatched) automatically include the opening balance values (344 manufactured, 344 dispatched) in their displayed totals by using the updated backend getMasterOrderStatus data that incorporates opening balance",
+      "files": [
+        "frontend/src/components/MasterOrderProgressSection.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-117"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import ProductionHistoryDetailTable from '../components/ProductionHistoryDetailTable';
 import DateRangeFilter from '../components/DateRangeFilter';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
-import { UserRole } from '../backend';
+import { useIsCallerAdmin } from '../hooks/useQueries';
 
 export default function ProductionHistoryPage() {
-  const { data: userProfile } = useGetCallerUserProfile();
-  const isAdmin = userProfile?.role === UserRole.Admin;
+  const { data: isAdmin } = useIsCallerAdmin();
 
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
@@ -43,7 +41,7 @@ export default function ProductionHistoryPage() {
       <ProductionHistoryDetailTable
         startDate={startDate}
         endDate={endDate}
-        isAdmin={isAdmin}
+        isAdmin={isAdmin || false}
       />
     </div>
   );

@@ -10,6 +10,7 @@ import DispatchTrackingPage from './pages/DispatchTrackingPage';
 import OperationWorkloadPage from './pages/OperationWorkloadPage';
 import DailyProductionReportPage from './pages/DailyProductionReportPage';
 import ProductionDashboardLivePage from './pages/ProductionDashboardLivePage';
+import HistoricalOpeningBalancePage from './pages/HistoricalOpeningBalancePage';
 import LoginPage from './pages/LoginPage';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
@@ -28,7 +29,9 @@ function ProtectedLayout() {
   return (
     <>
       <Layout>
-        <Outlet />
+        <div className="fade-in">
+          <Outlet />
+        </div>
       </Layout>
       {showProfileSetup && <ProfileSetup />}
     </>
@@ -42,7 +45,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: DashboardPage,
+  component: ProductionDashboardLivePage,
 });
 
 const dashboardRoute = createRoute({
@@ -87,6 +90,12 @@ const dailyProductionReportRoute = createRoute({
   component: DailyProductionReportPage,
 });
 
+const openingBalanceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/opening-balance',
+  component: HistoricalOpeningBalancePage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   dashboardRoute,
@@ -96,6 +105,7 @@ const routeTree = rootRoute.addChildren([
   dispatchTrackingRoute,
   operationWorkloadRoute,
   dailyProductionReportRoute,
+  openingBalanceRoute,
 ]);
 
 const router = createRouter({ routeTree });
@@ -108,9 +118,11 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <RouterProvider router={router} />
-      <Toaster />
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <div className="gradient-bg container-watermark min-h-screen">
+        <RouterProvider router={router} />
+        <Toaster />
+      </div>
     </ThemeProvider>
   );
 }
