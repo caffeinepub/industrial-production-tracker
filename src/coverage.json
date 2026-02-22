@@ -1,56 +1,82 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-22T11:40:21.978Z",
+  "generatedAt": "2026-02-22T13:39:48.934Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 2,
+    "total": 7,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-127",
-        "summary": "Create backend mutation function batchUpdateDailyProductionReport in backend/main.mo that accepts date (Text in YYYY-MM-DD format), an array of operation data objects containing operation_name, today_production, total_completed, and dispatched, auto-calculates in_hand (total_completed - dispatched) for each entry, checks if a Daily_Production_Report record exists for the given date + operation_name combination, performs UPDATE if record exists or INSERT if not exists, includes requireAdmin() authorization check, and returns a success confirmation with the count of entries processed",
+        "id": "REQ-163",
+        "summary": "Implement backend initialization logic in backend/main.mo to automatically populate Container_Types stable storage with 10 default container types on first canister deployment: 1) Dry / General Purpose, 2) High Cube, 3) Refrigerated (Reefer), 4) Flat Rack, 5) Open Top, 6) Open Side, 7) Double Door / Tunnel, 8) Tank (ISO Tank), 9) Half Height, 10) Special / Modified, all with is_active=true and sequential IDs 1-10",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-128",
-        "summary": "Execute batch insertion for date 2026-02-21 with all 17 operations using the exact production data: Boxing (today=5, total=400, dispatch=344), Welding/Finishing (today=4, total=399, dispatch=344), Rear Wall (today=2, total=403, dispatch=344), Front Wall (today=5, total=422, dispatch=344), Side Wall (today=8, total=439, dispatch=344), Roof (today=0, total=427, dispatch=344), Rear Door (today=10, total=420, dispatch=344), Blasting & Primer (today=4, total=367, dispatch=344), Final Paint (today=3, total=359, dispatch=344), Gasket (today=5, total=352, dispatch=344), DLM (today=5, total=352, dispatch=344), Plywood (today=5, total=351, dispatch=344), Floor Screw (today=5, total=350, dispatch=344), Decal (today=5, total=352, dispatch=344), Data Plate (today=5, total=352, dispatch=344), Sikha (today=4, total=346, dispatch=344), Black Paint (today=1, total=345, dispatch=344), storing date as '2026-02-21' in YYYY-MM-DD format with auto-calculated in_hand values",
+        "id": "REQ-164",
+        "summary": "Implement backend initialization logic in backend/main.mo to automatically populate Container_Sizes stable storage with 4 default container sizes on first canister deployment: 1) 20 ft Standard (length=20, width=8, height=8.5, is_high_cube=false), 2) 40 ft Standard (length=40, width=8, height=8.5, is_high_cube=false), 3) 40 ft High Cube (length=40, width=8, height=9.5, is_high_cube=true), 4) 45 ft High Cube (length=45, width=8, height=9.5, is_high_cube=true), all with is_active=true and sequential IDs 1-4",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-129",
-        "summary": "Update Master_Order_Status entry after batch data insertion with values: total_order_quantity=600, total_manufactured=345, total_dispatched=344, ensuring backend calculation shows remaining_to_produce=255 (600-345), finished_stock=1 (345-344), and completion_percentage=57.5 ((345/600)*100)",
+        "id": "REQ-165",
+        "summary": "Update backend migration logic in backend/migration.mo to apply default values to existing Daily_Production_Report entries that have NULL or missing container_type_id and container_size_id fields, setting container_type_id=2 (High Cube) and container_size_id=3 (40 ft High Cube) for backward compatibility with existing production data",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-130",
-        "summary": "Ensure ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx automatically refreshes and displays the updated production data for date 2026-02-21 after batch insertion completes, showing new today's production totals in summary cards, updated monthly summaries, refreshed production trend chart including the new date data point, and updated master order progress metrics with total_manufactured=345 and total_dispatched=344",
+        "id": "REQ-166",
+        "summary": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container types using useContainerTypes hook and populates the Container Type dropdown with all active container types, displaying loading state while fetching and showing a fallback message if no container types are available",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/ProductionDashboardLivePage.tsx"
+          "frontend/src/components/DailyProductionReportForm.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/ProductionDashboardLivePage.tsx"
+          "frontend/src/components/DailyProductionReportForm.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-131",
-        "summary": "Ensure LiveProductionTable component at frontend/src/components/LiveProductionTable.tsx correctly displays all 17 operations with production data when date 2026-02-21 is selected, showing each operation's today_production, total_completed, dispatched, and auto-calculated in_hand values in table rows",
+        "id": "REQ-167",
+        "summary": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container sizes using useContainerSizes hook and populates the Container Size dropdown with all active container sizes, displaying loading state while fetching and showing a fallback message if no container sizes are available",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/LiveProductionTable.tsx"
+          "frontend/src/components/DailyProductionReportForm.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/LiveProductionTable.tsx"
+          "frontend/src/components/DailyProductionReportForm.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-168",
+        "summary": "Ensure DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx enforces required validation for both Container Type and Container Size dropdown fields, preventing form submission if either field is not selected and displaying appropriate validation error messages",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/DailyProductionReportForm.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/DailyProductionReportForm.tsx"
+        ]
+      },
+      {
+        "id": "REQ-169",
+        "summary": "Verify useContainerTypes and useContainerSizes React Query hooks in frontend/src/hooks/useQueries.ts correctly call backend getContainerTypes() and getContainerSizes() queries with proper error handling, displaying toast notifications for API errors and implementing automatic retry logic for failed requests",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
@@ -62,9 +88,14 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/LiveProductionTable.tsx",
-    "frontend/src/components/MasterOrderProgressSection.tsx",
-    "frontend/src/pages/ProductionDashboardLivePage.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/DailyProductionReportForm.tsx",
+    "frontend/src/components/ProductionTrendChart.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/HistoricalOpeningBalancePage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

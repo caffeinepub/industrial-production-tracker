@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-productiondashboardlivepage-at-frontend-src-pages-productiondashboardlivepage-tsx-automatically-refreshes-and-displays-the-updated-production-data-for-date-2026-02-21-after-batch-insertion-completes-showing-new-today-s-production-totals-in-summary-cards-updated-monthly-summaries-refreshed-production-trend-chart-including-the-new-date-data-point-and-updated-master-order-progress-metrics-with-total-manufactured-345-and-total-dispatched-344",
-      "featureTitle": "Ensure ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx automatically refreshes and displays the updated production data for date 2026-02-21 after batch insertion completes, showing new today's production totals in summary cards, updated monthly summaries, refreshed production trend chart including the new date data point, and updated master order progress metrics with total_manufactured=345 and total_dispatched=344",
+      "featureId": "feature-verify-dailyproductionreportform-component-at-frontend-src-components-dailyproductionreportform-tsx-correctly-fetches-container-types-using-usecontainertypes-hook-and-populates-the-container-type-dropdown-with-all-active-container-types-displaying-loading-state-while-fetching-and-showing-a-fallback-message-if-no-container-types-are-available",
+      "featureTitle": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container types using useContainerTypes hook and populates the Container Type dropdown with all active container types, displaying loading state while fetching and showing a fallback message if no container types are available",
       "files": [
-        "frontend/src/pages/ProductionDashboardLivePage.tsx"
+        "frontend/src/components/DailyProductionReportForm.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,15 +17,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-130"
+        "REQ-166"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-liveproductiontable-component-at-frontend-src-components-liveproductiontable-tsx-correctly-displays-all-17-operations-with-production-data-when-date-2026-02-21-is-selected-showing-each-operation-s-today-production-total-completed-dispatched-and-auto-calculated-in-hand-values-in-table-rows",
-      "featureTitle": "Ensure LiveProductionTable component at frontend/src/components/LiveProductionTable.tsx correctly displays all 17 operations with production data when date 2026-02-21 is selected, showing each operation's today_production, total_completed, dispatched, and auto-calculated in_hand values in table rows",
+      "featureId": "feature-verify-dailyproductionreportform-component-at-frontend-src-components-dailyproductionreportform-tsx-correctly-fetches-container-sizes-using-usecontainersizes-hook-and-populates-the-container-size-dropdown-with-all-active-container-sizes-displaying-loading-state-while-fetching-and-showing-a-fallback-message-if-no-container-sizes-are-available",
+      "featureTitle": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container sizes using useContainerSizes hook and populates the Container Size dropdown with all active container sizes, displaying loading state while fetching and showing a fallback message if no container sizes are available",
       "files": [
-        "frontend/src/components/LiveProductionTable.tsx"
+        "frontend/src/components/DailyProductionReportForm.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -35,7 +37,45 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-131"
+        "REQ-167"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-dailyproductionreportform-component-at-frontend-src-components-dailyproductionreportform-tsx-enforces-required-validation-for-both-container-type-and-container-size-dropdown-fields-preventing-form-submission-if-either-field-is-not-selected-and-displaying-appropriate-validation-error-messages",
+      "featureTitle": "Ensure DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx enforces required validation for both Container Type and Container Size dropdown fields, preventing form submission if either field is not selected and displaying appropriate validation error messages",
+      "files": [
+        "frontend/src/components/DailyProductionReportForm.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-168"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-verify-usecontainertypes-and-usecontainersizes-react-query-hooks-in-frontend-src-hooks-usequeries-ts-correctly-call-backend-getcontainertypes-and-getcontainersizes-queries-with-proper-error-handling-displaying-toast-notifications-for-api-errors-and-implementing-automatic-retry-logic-for-failed-requests",
+      "featureTitle": "Verify useContainerTypes and useContainerSizes React Query hooks in frontend/src/hooks/useQueries.ts correctly call backend getContainerTypes() and getContainerSizes() queries with proper error handling, displaying toast notifications for API errors and implementing automatic retry logic for failed requests",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-169"
       ],
       "confidence": "high"
     }

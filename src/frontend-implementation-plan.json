@@ -1,43 +1,85 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Insert historical production data for date 2026-02-21 and update master order status",
+  "title": "Fix empty container type and size dropdowns in Daily Production Report Form",
   "requirements": [
     {
-      "id": "REQ-130",
-      "summary": "Ensure ProductionDashboardLivePage automatically refreshes and displays updated production data for date 2026-02-21",
+      "id": "REQ-166",
+      "summary": "Verify and fix Container Type dropdown to fetch and display active container types with proper loading and fallback states",
       "acceptanceCriteria": [
-        "Dashboard automatically refreshes after batch data insertion",
-        "Summary cards display updated today's production totals for 2026-02-21",
-        "Monthly production summaries reflect the new data",
-        "Production trend chart includes the new data point for 2026-02-21",
-        "Master order progress section shows total_manufactured=345 and total_dispatched=344",
-        "All calculated metrics (remaining, finished stock, completion %) are correct"
+        "Container Type dropdown displays all 10 container types when data is available",
+        "Loading indicator shows while fetching container types",
+        "Fallback message 'No container types available' displays if fetch returns empty",
+        "Dropdown is populated automatically on component mount"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ProductionDashboardLivePage.tsx",
+          "path": "frontend/src/components/DailyProductionReportForm.tsx",
           "operation": "modify",
-          "description": "Verify that the page correctly fetches and displays production data for the selected date (2026-02-21). Ensure that summary cards aggregate today's production totals from all operations, monthly summaries reflect the new data point, and the production trend chart includes the date 2026-02-21. The master order progress section should display total_manufactured=345 and total_dispatched=344 with correctly calculated derived metrics (remaining=255, finished_stock=1, completion_percentage=57.5). Add automatic query invalidation or refetch logic if needed to ensure the dashboard updates after batch data insertion completes."
+          "description": "Verify useContainerTypes hook integration and ensure Container Type dropdown properly displays loading state, renders all fetched container types, and shows 'No container types available' fallback message when data is empty. Ensure the dropdown uses containerTypes from the hook and maps each type to a Select.Item with proper id and container_type_name display. Add conditional rendering for loading skeleton and empty state message."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Verify useContainerTypes hook correctly calls backend getContainerTypes() query with enabled flag dependent on actor availability. Ensure the hook returns isLoading, isError, and data states properly. Verify error handling displays toast notifications on API failures and implements retry logic for failed requests."
         }
       ]
     },
     {
-      "id": "REQ-131",
-      "summary": "Ensure LiveProductionTable displays all 17 operations with production data for date 2026-02-21",
+      "id": "REQ-167",
+      "summary": "Verify and fix Container Size dropdown to fetch and display active container sizes with proper loading and fallback states",
       "acceptanceCriteria": [
-        "Table displays all 17 operations for date 2026-02-21",
-        "Each operation shows correct today_production value",
-        "Each operation shows correct total_completed value",
-        "Each operation shows correct dispatched value",
-        "in_hand is correctly calculated and displayed as (total_completed - dispatched)",
-        "Table loads without errors when 2026-02-21 is selected"
+        "Container Size dropdown displays all 4 container sizes when data is available",
+        "Loading indicator shows while fetching container sizes",
+        "Fallback message 'No container sizes available' displays if fetch returns empty",
+        "Dropdown is populated automatically on component mount"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/LiveProductionTable.tsx",
+          "path": "frontend/src/components/DailyProductionReportForm.tsx",
           "operation": "modify",
-          "description": "Verify that the table correctly displays all 17 operations (Boxing, Welding/Finishing, Rear Wall, Front Wall, Side Wall, Roof, Rear Door, Blasting & Primer, Final Paint, Gasket, DLM, Plywood, Floor Screw, Decal, Data Plate, Sikha, Black Paint) when date 2026-02-21 is selected. Ensure each row shows the correct today_production, total_completed, dispatched values, and that in_hand is correctly calculated as (total_completed - dispatched). Add error handling to ensure the table loads without errors when the historical date is selected."
+          "description": "Verify useContainerSizes hook integration and ensure Container Size dropdown properly displays loading state, renders all fetched container sizes, and shows 'No container sizes available' fallback message when data is empty. Ensure the dropdown uses containerSizes from the hook and maps each size to a Select.Item with proper id and container_size display. Add conditional rendering for loading skeleton and empty state message."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Verify useContainerSizes hook correctly calls backend getContainerSizes() query with enabled flag dependent on actor availability. Ensure the hook returns isLoading, isError, and data states properly. Verify error handling displays toast notifications on API failures and implements retry logic for failed requests."
+        }
+      ]
+    },
+    {
+      "id": "REQ-168",
+      "summary": "Enforce required validation for Container Type and Container Size dropdowns to prevent form submission without selections",
+      "acceptanceCriteria": [
+        "Form submission is blocked when Container Type is not selected",
+        "Form submission is blocked when Container Size is not selected",
+        "Validation error message displays for unselected Container Type field",
+        "Validation error message displays for unselected Container Size field",
+        "Form can submit successfully when both fields have valid selections"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/DailyProductionReportForm.tsx",
+          "operation": "modify",
+          "description": "Add required validation for containerTypeId and containerSizeId form fields. Implement validation checks on form submission that prevent submission if either field is empty/null. Display appropriate validation error messages below each dropdown when validation fails (e.g., 'Please select a container type' and 'Please select a container size'). Ensure form can only submit successfully when both fields have valid numeric selections. Add visual indicators (red borders, error text) for invalid fields."
+        }
+      ]
+    },
+    {
+      "id": "REQ-169",
+      "summary": "Verify React Query hooks correctly call backend queries with proper error handling and retry logic",
+      "acceptanceCriteria": [
+        "useContainerTypes hook successfully fetches container types from backend",
+        "useContainerSizes hook successfully fetches container sizes from backend",
+        "Error toast notifications display when API calls fail",
+        "Query hooks implement automatic retry on network failures",
+        "Loading and error states are properly managed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Verify useContainerTypes and useContainerSizes hooks are properly implemented with React Query's useQuery. Ensure queryFn correctly calls actor.getContainerTypes() and actor.getContainerSizes() respectively. Verify enabled flag checks for actor availability before making requests. Ensure onError callbacks display toast notifications with appropriate error messages (e.g., 'Failed to load container types'). Verify retry configuration is set (default is 3 retries) for network failures. Ensure hooks return proper loading, error, and data states for component consumption."
         }
       ]
     }

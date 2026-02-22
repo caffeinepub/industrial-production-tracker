@@ -1,227 +1,170 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useUpdateProductionHistoryEntry } from '../hooks/useQueries';
-import { Loader2 } from 'lucide-react';
+import { useUpdateProductionHistoryEntry, useContainerTypes, useContainerSizes } from '../hooks/useQueries';
+import { Loader2, Save } from 'lucide-react';
 import type { DailyProductionReport } from '../backend';
 
 interface EditProductionReportDialogProps {
+  report: DailyProductionReport;
   open: boolean;
-  entry: DailyProductionReport;
-  onSuccess: () => void;
-  onCancel: () => void;
+  onClose: () => void;
 }
 
 export default function EditProductionReportDialog({
+  report,
   open,
-  entry,
-  onSuccess,
-  onCancel,
+  onClose,
 }: EditProductionReportDialogProps) {
-  const [todayProduction, setTodayProduction] = useState('0');
-  const [totalCompleted, setTotalCompleted] = useState('0');
-  const [dispatched, setDispatched] = useState('0');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [todayProduction, setTodayProduction] = useState(Number(report.todayProduction).toString());
+  const [totalCompleted, setTotalCompleted] = useState(Number(report.totalCompleted).toString());
+  const [dispatched, setDispatched] = useState(Number(report.dispatched).toString());
+  const [inHand, setInHand] = useState(Number(report.inHand).toString());
 
   const updateMutation = useUpdateProductionHistoryEntry();
+  const { data: containerTypes } = useContainerTypes();
+  const { data: containerSizes } = useContainerSizes();
 
-  // Pre-populate form with entry values
+  const typeMap = useMemo(
+    () => new Map(containerTypes?.map((type) => [type.id, type.container_type_name])),
+    [containerTypes]
+  );
+  const sizeMap = useMemo(
+    () => new Map(containerSizes?.map((size) => [size.id, size.container_size])),
+    [containerSizes]
+  );
+
   useEffect(() => {
-    if (entry) {
-      setTodayProduction(entry.todayProduction.toString());
-      setTotalCompleted(entry.totalCompleted.toString());
-      setDispatched(entry.dispatched.toString());
-      setErrors({});
-    }
-  }, [entry]);
+    const completed = Number(totalCompleted) || 0;
+    const dispatchedVal = Number(dispatched) || 0;
+    const calculatedInHand = Math.max(0, completed - dispatchedVal);
+    setInHand(calculatedInHand.toString());
+  }, [totalCompleted, dispatched]);
 
-  // Calculate in-hand value
-  const inHand = Math.max(0, Number(totalCompleted) - Number(dispatched));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // Validation
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
+    await updateMutation.mutateAsync({
+      reportId: report.id,
+      todayProduction: BigInt(todayProduction || 0),
+      totalCompleted: BigInt(totalCompleted || 0),
+      dispatched: BigInt(dispatched || 0),
+      inHand: BigInt(inHand || 0),
+    });
 
-    const todayProd = Number(todayProduction);
-    const totalComp = Number(totalCompleted);
-    const disp = Number(dispatched);
-
-    if (isNaN(todayProd) || todayProd < 0) {
-      newErrors.todayProduction = "Must be a non-negative number";
-    }
-
-    if (isNaN(totalComp) || totalComp < 0) {
-      newErrors.totalCompleted = "Must be a non-negative number";
-    }
-
-    if (isNaN(disp) || disp < 0) {
-      newErrors.dispatched = "Must be a non-negative number";
-    }
-
-    if (totalComp < disp) {
-      newErrors.dispatched = "Cannot exceed total completed";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    onClose();
   };
 
-  const handleSave = async () => {
-    if (!validate()) {
-      return;
-    }
-
-    try {
-      await updateMutation.mutateAsync({
-        reportId: entry.id,
-        todayProduction: BigInt(todayProduction),
-        totalCompleted: BigInt(totalCompleted),
-        dispatched: BigInt(dispatched),
-        inHand: BigInt(inHand),
-      });
-      onSuccess();
-    } catch (error) {
-      console.error('Failed to update production report:', error);
-    }
-  };
-
-  const handleCancel = () => {
-    setErrors({});
-    onCancel();
-  };
-
-  const isFormValid = Object.keys(errors).length === 0;
+  const containerTypeName = typeMap.get(report.container_type_id) || `Type ${report.container_type_id}`;
+  const containerSizeName = sizeMap.get(report.container_size_id) || `Size ${report.container_size_id}`;
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCancel()}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="glass-card metallic-border sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit Production Report</DialogTitle>
-          <DialogDescription>
-            Update production metrics for this entry. All fields must be non-negative numbers.
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Read-only fields */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Date</Label>
-              <div className="px-3 py-2 bg-muted rounded-md text-sm font-medium">
-                {entry.date || 'N/A'}
-              </div>
+              <Label>Date</Label>
+              <Input value={report.date} disabled className="bg-muted/50" />
             </div>
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Operation</Label>
-              <div className="px-3 py-2 bg-muted rounded-md text-sm font-medium">
-                {entry.operationName}
-              </div>
+              <Label>Operation</Label>
+              <Input value={report.operationName} disabled className="bg-muted/50" />
             </div>
           </div>
 
-          {/* Editable fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Container Type</Label>
+              <Input value={containerTypeName} disabled className="bg-muted/50" />
+            </div>
+            <div className="space-y-2">
+              <Label>Container Size</Label>
+              <Input value={containerSizeName} disabled className="bg-muted/50" />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="todayProduction">
-              Today's Production <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="edit-todayProduction">Today's Production</Label>
             <Input
-              id="todayProduction"
+              id="edit-todayProduction"
               type="number"
               min="0"
               value={todayProduction}
-              onChange={(e) => {
-                setTodayProduction(e.target.value);
-                setErrors((prev) => ({ ...prev, todayProduction: '' }));
-              }}
-              onBlur={validate}
-              className={errors.todayProduction ? 'border-destructive' : ''}
+              onChange={(e) => setTodayProduction(e.target.value)}
+              required
+              className="glass-card metallic-border"
             />
-            {errors.todayProduction && (
-              <p className="text-xs text-destructive">{errors.todayProduction}</p>
-            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="totalCompleted">
-              Total Completed <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="edit-totalCompleted">Total Completed</Label>
             <Input
-              id="totalCompleted"
+              id="edit-totalCompleted"
               type="number"
               min="0"
               value={totalCompleted}
-              onChange={(e) => {
-                setTotalCompleted(e.target.value);
-                setErrors((prev) => ({ ...prev, totalCompleted: '' }));
-              }}
-              onBlur={validate}
-              className={errors.totalCompleted ? 'border-destructive' : ''}
+              onChange={(e) => setTotalCompleted(e.target.value)}
+              required
+              className="glass-card metallic-border"
             />
-            {errors.totalCompleted && (
-              <p className="text-xs text-destructive">{errors.totalCompleted}</p>
-            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dispatched">
-              Dispatched <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="edit-dispatched">Dispatched</Label>
             <Input
-              id="dispatched"
+              id="edit-dispatched"
               type="number"
               min="0"
               value={dispatched}
-              onChange={(e) => {
-                setDispatched(e.target.value);
-                setErrors((prev) => ({ ...prev, dispatched: '' }));
-              }}
-              onBlur={validate}
-              className={errors.dispatched ? 'border-destructive' : ''}
+              onChange={(e) => setDispatched(e.target.value)}
+              required
+              className="glass-card metallic-border"
             />
-            {errors.dispatched && (
-              <p className="text-xs text-destructive">{errors.dispatched}</p>
-            )}
           </div>
 
-          {/* Auto-calculated field */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">In Hand (Auto-calculated)</Label>
-            <div className="px-3 py-2 bg-primary/5 border border-primary/20 rounded-md text-sm font-semibold text-primary">
-              {inHand}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Calculated as: Total Completed - Dispatched
-            </p>
+            <Label htmlFor="edit-inHand">In Hand (Auto-calculated)</Label>
+            <Input
+              id="edit-inHand"
+              type="number"
+              value={inHand}
+              readOnly
+              className="glass-card metallic-border bg-muted/50"
+            />
           </div>
-        </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={updateMutation.isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!isFormValid || updateMutation.isPending}
-          >
-            {updateMutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Save Changes
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={updateMutation.isPending}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

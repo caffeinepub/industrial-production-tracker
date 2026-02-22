@@ -16,10 +16,18 @@ export type ContainerStatus = { 'readyForDispatch' : null } |
 export type ContainerType = { 'flatPack' : null } |
   { 'fullContainer' : null } |
   { 'insulated' : null };
+export interface ContainerTypes {
+  'id' : bigint,
+  'description' : string,
+  'container_type_name' : string,
+  'is_active' : boolean,
+}
 export interface DailyProductionReport {
   'id' : bigint,
+  'container_type_id' : bigint,
   'todayProduction' : bigint,
   'totalCompleted' : bigint,
+  'container_size_id' : bigint,
   'date' : string,
   'operationName' : string,
   'dispatched' : bigint,
@@ -51,6 +59,15 @@ export interface EnhancedMasterOrderStatus {
   'remainingToProduce' : bigint,
   'totalOrderQuantity' : bigint,
   'finishedStock' : bigint,
+}
+export interface FrontendContainerSizes {
+  'id' : bigint,
+  'container_size' : string,
+  'is_high_cube' : boolean,
+  'length_ft' : bigint,
+  'height_ft' : number,
+  'width_ft' : bigint,
+  'is_active' : boolean,
 }
 export interface HistoricalOpeningBalance {
   'id' : bigint,
@@ -106,7 +123,7 @@ export interface _SERVICE {
     undefined
   >,
   'createDailyProductionReport' : ActorMethod<
-    [string, string, bigint, bigint, bigint, bigint],
+    [string, string, bigint, bigint, bigint, bigint, bigint, bigint],
     bigint
   >,
   'createDispatchEntry' : ActorMethod<
@@ -123,10 +140,12 @@ export interface _SERVICE {
   >,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getContainerSizes' : ActorMethod<[], Array<FrontendContainerSizes>>,
   'getContainerStatuses' : ActorMethod<
     [],
     Array<[ContainerType, ContainerStatus]>
   >,
+  'getContainerTypes' : ActorMethod<[], Array<ContainerTypes>>,
   'getDailyProductionByStatus' : ActorMethod<
     [],
     Array<[ContainerType, ContainerStatus, bigint]>
@@ -136,7 +155,7 @@ export interface _SERVICE {
     Array<DailyProductionReport>
   >,
   'getDailyProductionReportsByDateRange' : ActorMethod<
-    [string, string],
+    [string, string, [[] | [bigint], [] | [bigint]]],
     Array<DailyProductionReport>
   >,
   'getDailyProductionReportsByOperation' : ActorMethod<
@@ -159,12 +178,17 @@ export interface _SERVICE {
     MonthlyProductionTotals
   >,
   'getOperationWorkloadSummary' : ActorMethod<[], Array<OperationStatus>>,
+  'getProductionSummaryByType' : ActorMethod<
+    [string, string, [[] | [bigint], [] | [bigint]]],
+    Array<[bigint, bigint, bigint, bigint, bigint]>
+  >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'initializeContainerTypesAndSizes' : ActorMethod<[], undefined>,
   'initializeProductionReports' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitOrUpdateDailyReport' : ActorMethod<
-    [string, string, bigint, bigint, bigint, bigint],
+    [string, string, bigint, bigint, bigint, bigint, bigint, bigint],
     bigint
   >,
   'updateDailyProductionReport' : ActorMethod<
@@ -172,7 +196,7 @@ export interface _SERVICE {
     undefined
   >,
   'updateDailyProductionReportById' : ActorMethod<
-    [bigint, bigint, bigint, bigint, bigint],
+    [bigint, [[] | [bigint], [] | [bigint]], bigint, bigint, bigint, bigint],
     undefined
   >,
   'updateDispatchStatus' : ActorMethod<[bigint, string], undefined>,

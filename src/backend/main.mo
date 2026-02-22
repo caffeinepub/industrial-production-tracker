@@ -8,13 +8,11 @@ import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Float "mo:core/Float";
-import Order "mo:core/Order";
-import Migration "migration";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
-// Apply migration on upgrade
 (with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
@@ -29,6 +27,33 @@ actor {
     #fullContainer;
     #flatPack;
     #insulated;
+  };
+
+  public type ContainerTypes = {
+    id : Nat;
+    container_type_name : Text;
+    description : Text;
+    is_active : Bool;
+  };
+
+  public type ContainerSizes = {
+    id : Nat;
+    container_size : Text;
+    length_ft : Nat;
+    width_ft : Nat;
+    height_ft : Nat;
+    is_high_cube : Bool;
+    is_active : Bool;
+  };
+
+  public type FrontendContainerSizes = {
+    id : Nat;
+    container_size : Text;
+    length_ft : Nat;
+    width_ft : Nat;
+    height_ft : Float;
+    is_high_cube : Bool;
+    is_active : Bool;
   };
 
   public type ContainerStatus = {
@@ -73,6 +98,8 @@ actor {
     id : Nat;
     date : Text;
     operationName : Text;
+    container_type_id : Nat;
+    container_size_id : Nat;
     todayProduction : Nat;
     totalCompleted : Nat;
     dispatched : Nat;
@@ -128,10 +155,14 @@ actor {
   let productionEntries = Map.empty<Nat, ProductionEntry>();
   let dispatchEntries = Map.empty<Nat, DispatchEntry>();
   let dailyProductionReports = Map.empty<Nat, DailyProductionReport>();
+  let containerTypes = Map.empty<Nat, ContainerTypes>();
+  var containerSizes = Map.empty<Nat, ContainerSizes>();
 
   var nextProductionId : Nat = 0;
   var nextDispatchId : Nat = 0;
   var nextReportId : Nat = 34;
+  var nextContainerTypeId : Nat = 11;
+  var nextContainerSizeId : Nat = 5;
 
   let initialOperations = [
     "Boxing",
@@ -173,6 +204,8 @@ actor {
         id = i;
         date = "";
         operationName = operation;
+        container_type_id = 2;
+        container_size_id = 3;
         todayProduction = 0;
         totalCompleted = 0;
         dispatched = 0;
@@ -182,40 +215,40 @@ actor {
     };
   };
 
-  public shared ({ caller }) func createHistoricalOpeningBalance(
-    openingDate : Text,
-    manufacturedBeforeSystem : Nat,
-    dispatchedBeforeSystem : Nat,
-    manufacturingStartDate : Text,
-    systemGoLiveDate : Text,
-  ) : async () {
+  public shared ({ caller }) func initializeContainerTypesAndSizes() : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
-    if (historicalOpeningBalance != null) {
-      Runtime.trap("Historical opening balance already exists. Only one entry is allowed.");
+    // Container Types
+    let types = [
+      { id = 1; container_type_name = "Dry / General Purpose"; description = "Standard containers for general cargo"; is_active = true },
+      { id = 2; container_type_name = "High Cube"; description = "Taller containers for larger cargo"; is_active = true },
+      { id = 3; container_type_name = "Refrigerated (Reefer)"; description = "Temperature-controlled containers"; is_active = true },
+      { id = 4; container_type_name = "Flat Rack"; description = "Containers with collapsible sides"; is_active = true },
+      { id = 5; container_type_name = "Open Top"; description = "Containers with removable/top covers"; is_active = true },
+      { id = 6; container_type_name = "Open Side"; description = "Containers with convertible sides"; is_active = true },
+      { id = 7; container_type_name = "Double Door / Tunnel"; description = "Containers with doors on both ends"; is_active = true },
+      { id = 8; container_type_name = "Tank (ISO Tank)"; description = "Containers for liquid cargo"; is_active = true },
+      { id = 9; container_type_name = "Half Height"; description = "Shorter containers for specific cargo"; is_active = true },
+      { id = 10; container_type_name = "Special / Modified"; description = "Custom containers for specialized needs"; is_active = true }
+    ];
+
+    for (t in types.values()) {
+      containerTypes.add(t.id, t);
     };
 
-    let balance : HistoricalOpeningBalance = {
-      id = 0;
-      openingDate;
-      manufacturedBeforeSystem;
-      dispatchedBeforeSystem;
-      isLocked = true;
-      entryType = "Historical Opening Balance";
-      manufacturingStartDate;
-      systemGoLiveDate;
-    };
+    // Container Sizes - corrected per implementation plan
+    let sizes = [
+      { id = 1; container_size = "20 ft Standard"; length_ft = 20; width_ft = 8; height_ft = 8; is_high_cube = false; is_active = true },
+      { id = 2; container_size = "40 ft Standard"; length_ft = 40; width_ft = 8; height_ft = 8; is_high_cube = false; is_active = true },
+      { id = 3; container_size = "40 ft High Cube"; length_ft = 40; width_ft = 8; height_ft = 9; is_high_cube = true; is_active = true },
+      { id = 4; container_size = "45 ft High Cube"; length_ft = 45; width_ft = 8; height_ft = 9; is_high_cube = true; is_active = true }
+    ];
 
-    historicalOpeningBalance := ?balance;
-  };
-
-  public query ({ caller }) func getHistoricalOpeningBalance() : async ?HistoricalOpeningBalance {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    for (s in sizes.values()) {
+      containerSizes.add(s.id, s);
     };
-    historicalOpeningBalance;
   };
 
   public query ({ caller }) func getDailyProductionReportsByOperation(operationName : Text) : async [DailyProductionReport] {
@@ -242,15 +275,32 @@ actor {
     );
   };
 
-  public query ({ caller }) func getDailyProductionReportsByDateRange(startDate : Text, endDate : Text) : async [DailyProductionReport] {
+  public query ({ caller }) func getDailyProductionReportsByDateRange(
+    startDate : Text,
+    endDate : Text,
+    containerFilters : (?Nat, ?Nat),
+  ) : async [DailyProductionReport] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can access this data");
     };
+
+    let (containerTypeId, containerSizeId) = containerFilters;
     let filteredReports = List.empty<DailyProductionReport>();
 
     for ((_, report) in dailyProductionReports.entries()) {
       if (Text.compare(report.date, startDate) != #less and Text.compare(report.date, endDate) != #greater) {
-        filteredReports.add(report);
+        let typeMatches = switch (containerTypeId) {
+          case (?id) { report.container_type_id == id };
+          case (null) { true };
+        };
+        let sizeMatches = switch (containerSizeId) {
+          case (?id) { report.container_size_id == id };
+          case (null) { true };
+        };
+
+        if (typeMatches and sizeMatches) {
+          filteredReports.add(report);
+        };
       };
     };
 
@@ -261,6 +311,71 @@ actor {
         Text.compare(b.date, a.date);
       }
     );
+  };
+
+  public query ({ caller }) func getProductionSummaryByType(
+    startDate : Text,
+    endDate : Text,
+    containerFilters : (?Nat, ?Nat),
+  ) : async [(Nat, Nat, Nat, Nat, Nat)] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
+
+    let (containerTypeId, containerSizeId) = containerFilters;
+    let filteredReports = List.empty<DailyProductionReport>();
+
+    for ((_, report) in dailyProductionReports.entries()) {
+      if (Text.compare(report.date, startDate) != #less and Text.compare(report.date, endDate) != #greater) {
+        let typeMatches = switch (containerTypeId) {
+          case (?id) { report.container_type_id == id };
+          case (null) { true };
+        };
+        let sizeMatches = switch (containerSizeId) {
+          case (?id) { report.container_size_id == id };
+          case (null) { true };
+        };
+
+        if (typeMatches and sizeMatches) {
+          filteredReports.add(report);
+        };
+      };
+    };
+
+    let reportsArray = filteredReports.toArray();
+
+    let summaryMap = Map.empty<Nat, (Nat, Nat, Nat, Nat)>();
+
+    for (r in reportsArray.values()) {
+      switch (summaryMap.get(r.container_type_id)) {
+        case (?existingTotals) {
+          let (todayProd, totalComp, dispatched, inHand) = existingTotals;
+          summaryMap.add(
+            r.container_type_id,
+            (
+              todayProd + r.todayProduction,
+              totalComp + r.totalCompleted,
+              dispatched + r.dispatched,
+              inHand + r.inHand,
+            ),
+          );
+        };
+        case (null) {
+          summaryMap.add(
+            r.container_type_id,
+            (r.todayProduction, r.totalCompleted, r.dispatched, r.inHand),
+          );
+        };
+      };
+    };
+
+    let resultList = List.empty<(Nat, Nat, Nat, Nat, Nat)>();
+    for ((typeId, values) in summaryMap.entries()) {
+      let (todayProd, totalComp, dispatched, inHand) = values;
+      resultList.add((typeId, todayProd, totalComp, dispatched, inHand));
+    };
+
+    resultList.toArray();
   };
 
   public query ({ caller }) func getOperationWorkloadSummary() : async [OperationStatus] {
@@ -348,7 +463,9 @@ actor {
     };
 
     let finishedStock = masterOrderStatus.totalManufactured - masterOrderStatus.totalDispatched;
-    let completionPercentage = ((masterOrderStatus.totalManufactured.toFloat() / masterOrderStatus.totalOrderQuantity.toFloat()) * 100.0);
+    let completionPercentage = (
+      masterOrderStatus.totalManufactured.toFloat() / masterOrderStatus.totalOrderQuantity.toFloat()
+    ) * 100.0;
 
     {
       id = masterOrderStatus.id;
@@ -460,15 +577,34 @@ actor {
     };
   };
 
-  public shared ({ caller }) func createDailyProductionReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, dispatched : Nat, inHand : Nat) : async Nat {
+  public shared ({ caller }) func createDailyProductionReport(
+    date : Text,
+    operationName : Text,
+    containerTypeId : Nat,
+    containerSizeId : Nat,
+    todayProduction : Nat,
+    totalCompleted : Nat,
+    dispatched : Nat,
+    inHand : Nat,
+  ) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    if (not containerTypes.containsKey(containerTypeId)) {
+      Runtime.trap("Invalid container type ID: " # containerTypeId.toText());
+    };
+
+    if (not containerSizes.containsKey(containerSizeId)) {
+      Runtime.trap("Invalid container size ID: " # containerSizeId.toText());
     };
 
     let report : DailyProductionReport = {
       id = nextReportId;
       date;
       operationName;
+      container_type_id = containerTypeId;
+      container_size_id = containerSizeId;
       todayProduction;
       totalCompleted;
       dispatched;
@@ -484,19 +620,48 @@ actor {
     Runtime.trap("This update function is deprecated! Please call `updateDailyProductionReportById` instead.");
   };
 
-  public shared ({ caller }) func updateDailyProductionReportById(reportId : Nat, todayProduction : Nat, totalCompleted : Nat, dispatched : Nat, inHand : Nat) : async () {
+  public shared ({ caller }) func updateDailyProductionReportById(
+    reportId : Nat,
+    containerFilters : (?Nat, ?Nat),
+    todayProduction : Nat,
+    totalCompleted : Nat,
+    dispatched : Nat,
+    inHand : Nat,
+  ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
+    let (containerTypeId, containerSizeId) = containerFilters;
     switch (dailyProductionReports.get(reportId)) {
       case (null) {
         Runtime.trap("Production report with ID " # reportId.toText() # " not found");
       };
       case (?existingReport) {
+        let newTypeId = switch (containerTypeId) {
+          case (?id) {
+            if (not containerTypes.containsKey(id)) {
+              Runtime.trap("Invalid container type ID: " # id.toText());
+            };
+            id;
+          };
+          case (null) { existingReport.container_type_id };
+        };
+        let newSizeId = switch (containerSizeId) {
+          case (?id) {
+            if (not containerSizes.containsKey(id)) {
+              Runtime.trap("Invalid container size ID: " # id.toText());
+            };
+            id;
+          };
+          case (null) { existingReport.container_size_id };
+        };
+
         let updatedReport = {
           id = existingReport.id;
           date = existingReport.date;
           operationName = existingReport.operationName;
+          container_type_id = newTypeId;
+          container_size_id = newSizeId;
           todayProduction;
           totalCompleted;
           dispatched;
@@ -507,9 +672,26 @@ actor {
     };
   };
 
-  public shared ({ caller }) func submitOrUpdateDailyReport(date : Text, operationName : Text, todayProduction : Nat, totalCompleted : Nat, dispatched : Nat, inHand : Nat) : async Nat {
+  public shared ({ caller }) func submitOrUpdateDailyReport(
+    date : Text,
+    operationName : Text,
+    containerTypeId : Nat,
+    containerSizeId : Nat,
+    todayProduction : Nat,
+    totalCompleted : Nat,
+    dispatched : Nat,
+    inHand : Nat,
+  ) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    if (not containerTypes.containsKey(containerTypeId)) {
+      Runtime.trap("Invalid container type ID: " # containerTypeId.toText());
+    };
+
+    if (not containerSizes.containsKey(containerSizeId)) {
+      Runtime.trap("Invalid container size ID: " # containerSizeId.toText());
     };
 
     let existingReportId = findReportId(date, operationName);
@@ -520,6 +702,8 @@ actor {
           id = nextReportId;
           date;
           operationName;
+          container_type_id = containerTypeId;
+          container_size_id = containerSizeId;
           todayProduction;
           totalCompleted;
           dispatched;
@@ -541,6 +725,8 @@ actor {
               id = existingReport.id;
               date = existingReport.date;
               operationName = existingReport.operationName;
+              container_type_id = containerTypeId;
+              container_size_id = containerSizeId;
               todayProduction;
               totalCompleted;
               dispatched;
@@ -580,6 +766,8 @@ actor {
             id = nextReportId;
             date;
             operationName = operation.operationName;
+            container_type_id = 2;
+            container_size_id = 3;
             todayProduction = operation.todayProduction;
             totalCompleted = operation.totalCompleted;
             dispatched = operation.dispatched;
@@ -598,6 +786,8 @@ actor {
                 id = existingReport.id;
                 date = existingReport.date;
                 operationName = existingReport.operationName;
+                container_type_id = 2;
+                container_size_id = 3;
                 todayProduction = operation.todayProduction;
                 totalCompleted = operation.totalCompleted;
                 dispatched = operation.dispatched;
@@ -631,5 +821,71 @@ actor {
     };
     userProfiles.add(caller, profile);
   };
-};
 
+  // Backend logic - HANDLES IMMUTABLE FIELDS ONLY! Otherwise, take care of with an update logic
+  public query ({ caller }) func getContainerTypes() : async [ContainerTypes] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
+    let types = List.empty<ContainerTypes>();
+    for ((_, t) in containerTypes.entries()) {
+      if (t.is_active) {
+        types.add(t);
+      };
+    };
+    types.toArray();
+  };
+
+  // Exposes stable container representation as immutable version to the frontend converting Nat height_ft to Float
+  public query ({ caller }) func getContainerSizes() : async [FrontendContainerSizes] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
+    let sizes = List.empty<FrontendContainerSizes>();
+    for ((_, s) in containerSizes.entries()) {
+      if (s.is_active) {
+        sizes.add({
+          s with
+          height_ft = s.height_ft.toFloat();
+        });
+      };
+    };
+    sizes.toArray();
+  };
+
+  public query ({ caller }) func getHistoricalOpeningBalance() : async ?HistoricalOpeningBalance {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can access this data");
+    };
+    historicalOpeningBalance;
+  };
+
+  public shared ({ caller }) func createHistoricalOpeningBalance(
+    openingDate : Text,
+    manufacturedBeforeSystem : Nat,
+    dispatchedBeforeSystem : Nat,
+    manufacturingStartDate : Text,
+    systemGoLiveDate : Text,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    if (historicalOpeningBalance != null) {
+      Runtime.trap("Historical opening balance already exists. Only one entry is allowed.");
+    };
+
+    let balance : HistoricalOpeningBalance = {
+      id = 0;
+      openingDate;
+      manufacturedBeforeSystem;
+      dispatchedBeforeSystem;
+      isLocked = true;
+      entryType = "Historical Opening Balance";
+      manufacturingStartDate;
+      systemGoLiveDate;
+    };
+
+    historicalOpeningBalance := ?balance;
+  };
+};

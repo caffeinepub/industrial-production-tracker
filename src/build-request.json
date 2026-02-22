@@ -1,133 +1,165 @@
 {
   "kind": "build_request",
-  "title": "Insert historical production data for date 2026-02-21 and update master order status",
-  "priority": "normal",
+  "title": "Seed container types and sizes master data with backend initialization and fix empty dropdowns",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-127",
-      "text": "Create backend mutation function batchUpdateDailyProductionReport in backend/main.mo that accepts date (Text in YYYY-MM-DD format), an array of operation data objects containing operation_name, today_production, total_completed, and dispatched, auto-calculates in_hand (total_completed - dispatched) for each entry, checks if a Daily_Production_Report record exists for the given date + operation_name combination, performs UPDATE if record exists or INSERT if not exists, includes requireAdmin() authorization check, and returns a success confirmation with the count of entries processed",
+      "id": "REQ-163",
+      "text": "Implement backend initialization logic in backend/main.mo to automatically populate Container_Types stable storage with 10 default container types on first canister deployment: 1) Dry / General Purpose, 2) High Cube, 3) Refrigerated (Reefer), 4) Flat Rack, 5) Open Top, 6) Open Side, 7) Double Door / Tunnel, 8) Tank (ISO Tank), 9) Half Height, 10) Special / Modified, all with is_active=true and sequential IDs 1-10",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-user-batch-request"
+          "msg-recent"
         ],
         "quotes": [
-          "Create or update Daily_Production_Report entries for date 21.02.2026",
-          "If record exists for date + operation → UPDATE, If not exists → INSERT",
-          "Store date in database as: 2026-02-21 (YYYY-MM-DD format)"
+          "Insert default master data into Container_Types table: Dry / General Purpose, High Cube, Refrigerated (Reefer), Flat Rack, Open Top, Open Side, Double Door / Tunnel, Tank (ISO Tank), Half Height, Special / Modified"
         ]
       },
       "acceptanceCriteria": [
-        "Function accepts date parameter in YYYY-MM-DD format",
-        "Function accepts array of operation data with operation_name, today_production, total_completed, dispatched fields",
-        "Function auto-calculates in_hand = total_completed - dispatched for each entry",
-        "Function checks existence of Daily_Production_Report entry by date + operation_name",
-        "Function updates existing entries or inserts new entries as appropriate",
-        "Function includes requireAdmin() authorization check",
-        "Function returns success confirmation with count of processed entries"
+        "Container_Types stable storage contains exactly 10 pre-populated entries on initialization",
+        "All container types have is_active=true",
+        "IDs are sequential starting from 1",
+        "Container type names match exactly as specified"
       ]
     },
     {
-      "id": "REQ-128",
-      "text": "Execute batch insertion for date 2026-02-21 with all 17 operations using the exact production data: Boxing (today=5, total=400, dispatch=344), Welding/Finishing (today=4, total=399, dispatch=344), Rear Wall (today=2, total=403, dispatch=344), Front Wall (today=5, total=422, dispatch=344), Side Wall (today=8, total=439, dispatch=344), Roof (today=0, total=427, dispatch=344), Rear Door (today=10, total=420, dispatch=344), Blasting & Primer (today=4, total=367, dispatch=344), Final Paint (today=3, total=359, dispatch=344), Gasket (today=5, total=352, dispatch=344), DLM (today=5, total=352, dispatch=344), Plywood (today=5, total=351, dispatch=344), Floor Screw (today=5, total=350, dispatch=344), Decal (today=5, total=352, dispatch=344), Data Plate (today=5, total=352, dispatch=344), Sikha (today=4, total=346, dispatch=344), Black Paint (today=1, total=345, dispatch=344), storing date as '2026-02-21' in YYYY-MM-DD format with auto-calculated in_hand values",
+      "id": "REQ-164",
+      "text": "Implement backend initialization logic in backend/main.mo to automatically populate Container_Sizes stable storage with 4 default container sizes on first canister deployment: 1) 20 ft Standard (length=20, width=8, height=8.5, is_high_cube=false), 2) 40 ft Standard (length=40, width=8, height=8.5, is_high_cube=false), 3) 40 ft High Cube (length=40, width=8, height=9.5, is_high_cube=true), 4) 45 ft High Cube (length=45, width=8, height=9.5, is_high_cube=true), all with is_active=true and sequential IDs 1-4",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-user-batch-request"
+          "msg-recent"
         ],
         "quotes": [
-          "Data: Boxing → today=5, total=400, dispatch=344",
-          "Store date in database as: 2026-02-21 (YYYY-MM-DD format)",
-          "Auto calculate: in_hand = total - dispatch"
+          "Insert default master data into Container_Sizes table: 20 ft Standard → length=20, width=8, height=8.5, is_high_cube=false; 40 ft Standard → length=40, width=8, height=8.5, is_high_cube=false; 40 ft High Cube → length=40, width=8, height=9.5, is_high_cube=true; 45 ft High Cube → length=45, width=8, height=9.5, is_high_cube=true"
         ]
       },
       "acceptanceCriteria": [
-        "All 17 operation entries are created/updated for date 2026-02-21",
-        "Date is stored as '2026-02-21' in YYYY-MM-DD format",
-        "Each entry has correct today_production, total_completed, and dispatched values as specified",
-        "in_hand is auto-calculated for each entry as total_completed - dispatched",
-        "All entries are persisted to stable storage"
+        "Container_Sizes stable storage contains exactly 4 pre-populated entries on initialization",
+        "All container sizes have is_active=true",
+        "IDs are sequential starting from 1",
+        "Dimensions match exactly as specified for each size",
+        "is_high_cube flags are correctly set"
       ]
     },
     {
-      "id": "REQ-129",
-      "text": "Update Master_Order_Status entry after batch data insertion with values: total_order_quantity=600, total_manufactured=345, total_dispatched=344, ensuring backend calculation shows remaining_to_produce=255 (600-345), finished_stock=1 (345-344), and completion_percentage=57.5 ((345/600)*100)",
+      "id": "REQ-165",
+      "text": "Update backend migration logic in backend/migration.mo to apply default values to existing Daily_Production_Report entries that have NULL or missing container_type_id and container_size_id fields, setting container_type_id=2 (High Cube) and container_size_id=3 (40 ft High Cube) for backward compatibility with existing production data",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-user-batch-request"
+          "msg-recent"
         ],
         "quotes": [
-          "After saving: Update Master_Order_Status: total_order_quantity = 600, total_manufactured = 345, total_dispatched = 344, remaining_to_produce = 255, finished_stock = 1, completion_percentage = 57.5"
+          "For existing Daily_Production_Report rows: If container_type_id is NULL → assign 'High Cube', If container_size_id is NULL → assign '40 ft High Cube'"
         ]
       },
       "acceptanceCriteria": [
-        "Master_Order_Status entry is updated with total_order_quantity=600",
-        "total_manufactured is set to 345",
-        "total_dispatched is set to 344",
-        "Backend correctly calculates remaining_to_produce as 255",
-        "Backend correctly calculates finished_stock as 1",
-        "Backend correctly calculates completion_percentage as 57.5"
+        "All existing Daily_Production_Report entries without container_type_id receive value 2",
+        "All existing Daily_Production_Report entries without container_size_id receive value 3",
+        "Migration logic runs automatically during canister upgrade",
+        "No data loss occurs during migration"
       ]
     },
     {
-      "id": "REQ-130",
-      "text": "Ensure ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx automatically refreshes and displays the updated production data for date 2026-02-21 after batch insertion completes, showing new today's production totals in summary cards, updated monthly summaries, refreshed production trend chart including the new date data point, and updated master order progress metrics with total_manufactured=345 and total_dispatched=344",
+      "id": "REQ-166",
+      "text": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container types using useContainerTypes hook and populates the Container Type dropdown with all active container types, displaying loading state while fetching and showing a fallback message if no container types are available",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-batch-request"
+          "msg-recent"
         ],
         "quotes": [
-          "Ensure dashboard allows viewing data for selected historical date 2026-02-21"
+          "Fetch active container types dynamically from Container_Types",
+          "Ensure dropdown loads automatically on page load",
+          "If no data found, show fallback message"
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard automatically refreshes after batch data insertion",
-        "Summary cards display updated today's production totals for 2026-02-21",
-        "Monthly production summaries reflect the new data",
-        "Production trend chart includes the new data point for 2026-02-21",
-        "Master order progress section shows total_manufactured=345 and total_dispatched=344",
-        "All calculated metrics (remaining, finished stock, completion %) are correct"
+        "Container Type dropdown displays all 10 container types when data is available",
+        "Loading indicator shows while fetching container types",
+        "Fallback message 'No container types available' displays if fetch returns empty",
+        "Dropdown is populated automatically on component mount"
       ]
     },
     {
-      "id": "REQ-131",
-      "text": "Ensure LiveProductionTable component at frontend/src/components/LiveProductionTable.tsx correctly displays all 17 operations with production data when date 2026-02-21 is selected, showing each operation's today_production, total_completed, dispatched, and auto-calculated in_hand values in table rows",
+      "id": "REQ-167",
+      "text": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container sizes using useContainerSizes hook and populates the Container Size dropdown with all active container sizes, displaying loading state while fetching and showing a fallback message if no container sizes are available",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-batch-request"
+          "msg-recent"
         ],
         "quotes": [
-          "Ensure dashboard allows viewing data for selected historical date 2026-02-21"
+          "Fetch active container sizes dynamically from Container_Sizes",
+          "Ensure dropdown loads automatically on page load",
+          "If no data found, show fallback message"
         ]
       },
       "acceptanceCriteria": [
-        "Table displays all 17 operations for date 2026-02-21",
-        "Each operation shows correct today_production value",
-        "Each operation shows correct total_completed value",
-        "Each operation shows correct dispatched value",
-        "in_hand is correctly calculated and displayed as (total_completed - dispatched)",
-        "Table loads without errors when 2026-02-21 is selected"
+        "Container Size dropdown displays all 4 container sizes when data is available",
+        "Loading indicator shows while fetching container sizes",
+        "Fallback message 'No container sizes available' displays if fetch returns empty",
+        "Dropdown is populated automatically on component mount"
+      ]
+    },
+    {
+      "id": "REQ-168",
+      "text": "Ensure DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx enforces required validation for both Container Type and Container Size dropdown fields, preventing form submission if either field is not selected and displaying appropriate validation error messages",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Make both fields required",
+          "Show validation error if not selected"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Form submission is blocked when Container Type is not selected",
+        "Form submission is blocked when Container Size is not selected",
+        "Validation error message displays for unselected Container Type field",
+        "Validation error message displays for unselected Container Size field",
+        "Form can submit successfully when both fields have valid selections"
+      ]
+    },
+    {
+      "id": "REQ-169",
+      "text": "Verify useContainerTypes and useContainerSizes React Query hooks in frontend/src/hooks/useQueries.ts correctly call backend getContainerTypes() and getContainerSizes() queries with proper error handling, displaying toast notifications for API errors and implementing automatic retry logic for failed requests",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Implement proper API query for fetching dropdown data"
+        ]
+      },
+      "acceptanceCriteria": [
+        "useContainerTypes hook successfully fetches container types from backend",
+        "useContainerSizes hook successfully fetches container sizes from backend",
+        "Error toast notifications display when API calls fail",
+        "Query hooks implement automatic retry on network failures",
+        "Loading and error states are properly managed"
       ]
     }
   ],
   "constraints": [
-    "Do not modify frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useInternetIdentity.tsx",
-    "Do not modify frontend/src/hooks/useActor.ts",
-    "Do not modify frontend/src/main.tsx",
-    "Do not modify frontend/src/components/ui directory",
-    "Maintain single-actor architecture in backend/main.mo",
-    "Use stable storage for all data persistence",
-    "Date must be stored in YYYY-MM-DD format (2026-02-21)"
+    "All Motoko logic must remain in the single main actor file (backend/main.mo)",
+    "Migration logic must be placed in backend/migration.mo",
+    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui",
+    "Container type IDs must match: High Cube = 2, for backward compatibility migration",
+    "Container size IDs must match: 40 ft High Cube = 3, for backward compatibility migration",
+    "All backend queries must include requireAuthenticated() authorization check",
+    "All backend mutations must include requireAdmin() authorization check"
   ],
   "nonGoals": [
-    "Modifying the date format display in the UI",
-    "Adding new operations beyond the existing 17",
-    "Changing the master order total quantity target",
-    "Implementing data export functionality",
-    "Adding user notifications or alerts"
+    "Editing or deleting container types and sizes (master data is read-only)",
+    "Adding UI for managing container types and sizes master data",
+    "Changing existing frontend component structure beyond dropdown population fixes",
+    "Modifying container type and size filtering logic already implemented",
+    "Creating new pages or navigation items"
   ],
   "imageRequirements": {
     "required": [],

@@ -1,27 +1,36 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-22T11:40:21.973Z",
-  "summary": "The implementation successfully creates the backend mutation function for batch updates, includes a migration file to insert the historical data for 2026-02-21, updates the Master_Order_Status values, and ensures the frontend dashboard and table components display the new data correctly. All 5 requirements appear to be implemented with proper validation and data flow.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-22T13:39:48.928Z",
+  "summary": "The diff implements backend initialization with default container types and sizes, migration logic for existing data, and frontend dropdown population with proper validation. However, several acceptance criteria are not fully verifiable due to truncated content, and some implementation details differ from specifications.",
+  "missing_requirements": [
     {
-      "description": "Migration module (backend/migration.mo) that performs automatic data insertion on actor upgrade",
-      "reason": "REQ-128 specifies 'Execute batch insertion' but does not explicitly require a migration module or automatic execution on upgrade. The requirement implies manual execution or a one-time operation, not an upgrade hook.",
+      "id": "REQ-164",
+      "requirement": "Container sizes must have height_ft dimensions matching 8.5 and 9.5 as specified (20ft: 8.5, 40ft standard: 8.5, 40ft high cube: 9.5, 45ft high cube: 9.5)",
+      "reason": "Migration.mo shows height_ft values of 8 and 9 instead of 8.5 and 9.5. The specification clearly states height=8.5 for standard containers and height=9.5 for high cube containers, but the implementation uses integer values 8 and 9.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo"
+        "backend/migration.mo"
+      ]
+    },
+    {
+      "id": "REQ-169",
+      "requirement": "Error toast notifications must display when API calls fail for useContainerTypes and useContainerSizes hooks",
+      "reason": "useQueries.ts shows useContainerTypes and useContainerSizes hooks with retry: 3 and staleTime configuration, but no explicit onError handlers with toast.error() calls are visible in the truncated code, unlike other mutations (e.g., useCreateProductionEntry) that do include toast.error() handlers.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts"
       ]
     }
   ],
-  "confidence": 0.85,
+  "hallucinated_features": [],
+  "confidence": 0.75,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/LiveProductionTable.tsx",
-    "frontend/src/components/MasterOrderProgressSection.tsx",
-    "frontend/src/pages/ProductionDashboardLivePage.tsx",
+    "frontend/src/components/DailyProductionReportForm.tsx",
+    "frontend/src/components/ProductionTrendChart.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/HistoricalOpeningBalancePage.tsx",
     "project_state.json"
   ]
 }

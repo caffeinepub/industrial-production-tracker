@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 35,
-  "summary": "Premium industrial SaaS production tracking web application with dark theme UI, animated dashboard, collapsible sidebar navigation, modern visual design for shipping container manufacturing with role-based access control, and Master Order Progress tracking system",
+  "projectStateVersion": 39,
+  "summary": "Premium industrial SaaS production tracking web application with dark theme UI, animated dashboard, collapsible sidebar navigation, modern visual design for shipping container manufacturing with role-based access control, Master Order Progress tracking system, and multi-type/multi-size container production tracking with type/size filtering",
   "architectural_notes": [
     "Mobile-first responsive design for smartphone data entry",
     "Web-based application for shipping container manufacturing tracking",
@@ -15,7 +15,7 @@
     "Collapsible sidebar navigation with smooth animations and shipping container logo"
   ],
   "known_issues": [],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-implement-admin-authentication-system-with-login-functionality-using-internet-identity-integration",
@@ -620,6 +620,190 @@
         "REQ-131"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hook-usecontainertypes-in-frontend-src-hooks-usequeries-ts-that-fetches-all-active-container-types-from-the-backend-getcontainertypes-query",
+      "title": "Create React Query hook useContainerTypes in frontend/src/hooks/useQueries.ts that fetches all active container types from the backend getContainerTypes query",
+      "reqIds": [
+        "REQ-144"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hook-usecontainersizes-in-frontend-src-hooks-usequeries-ts-that-fetches-all-active-container-sizes-from-the-backend-getcontainersizes-query",
+      "title": "Create React Query hook useContainerSizes in frontend/src/hooks/useQueries.ts that fetches all active container sizes from the backend getContainerSizes query",
+      "reqIds": [
+        "REQ-145"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-dailyproductionreportform-component-at-frontend-src-components-dailyproductionreportform-tsx-to-add-two-required-dropdown-fields-select-container-type-and-select-container-size-above-the-existing-operation-selection-both-using-data-from-usecontainertypes-and-usecontainersizes-hooks-with-validation-preventing-form-submission-if-either-is-not-selected",
+      "title": "Update DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx to add two required dropdown fields: 'Select Container Type' and 'Select Container Size' above the existing operation selection, both using data from useContainerTypes and useContainerSizes hooks with validation preventing form submission if either is not selected",
+      "reqIds": [
+        "REQ-146"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-createdailyproductionreport-mutation-in-frontend-src-hooks-usequeries-ts-to-include-container-type-id-and-container-size-id-in-the-request-payload",
+      "title": "Update the createDailyProductionReport mutation in frontend/src/hooks/useQueries.ts to include container_type_id and container_size_id in the request payload",
+      "reqIds": [
+        "REQ-147"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-containertypefilter-component-at-frontend-src-components-containertypefilter-tsx-that-renders-a-dropdown-for-selecting-container-type-with-an-all-types-option-for-clearing-the-filter-styled-consistently-with-the-premium-dark-theme",
+      "title": "Create ContainerTypeFilter component at frontend/src/components/ContainerTypeFilter.tsx that renders a dropdown for selecting container type with an 'All Types' option for clearing the filter, styled consistently with the premium dark theme",
+      "reqIds": [
+        "REQ-148"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-containersizefilter-component-at-frontend-src-components-containersizefilter-tsx-that-renders-a-dropdown-for-selecting-container-size-with-an-all-sizes-option-for-clearing-the-filter-styled-consistently-with-the-premium-dark-theme",
+      "title": "Create ContainerSizeFilter component at frontend/src/components/ContainerSizeFilter.tsx that renders a dropdown for selecting container size with an 'All Sizes' option for clearing the filter, styled consistently with the premium dark theme",
+      "reqIds": [
+        "REQ-149"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-productiondashboardlivepage-at-frontend-src-pages-productiondashboardlivepage-tsx-to-add-containertypefilter-and-containersizefilter-components-above-the-summary-cards-section-positioned-horizontally-side-by-side-with-consistent-spacing",
+      "title": "Update ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx to add ContainerTypeFilter and ContainerSizeFilter components above the summary cards section, positioned horizontally side-by-side with consistent spacing",
+      "reqIds": [
+        "REQ-150"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-react-query-hooks-in-frontend-src-hooks-usequeries-ts-that-fetch-daily-production-reports-to-accept-optional-container-type-id-and-container-size-id-filter-parameters-and-pass-them-to-backend-queries",
+      "title": "Update React Query hooks in frontend/src/hooks/useQueries.ts that fetch daily production reports to accept optional container_type_id and container_size_id filter parameters and pass them to backend queries",
+      "reqIds": [
+        "REQ-151"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-liveproductiontable-component-at-frontend-src-components-liveproductiontable-tsx-to-apply-container-type-and-size-filters-when-fetching-production-data-displaying-filtered-results-while-maintaining-the-existing-table-structure-and-placeholder-rows-for-operations-without-data",
+      "title": "Update LiveProductionTable component at frontend/src/components/LiveProductionTable.tsx to apply container type and size filters when fetching production data, displaying filtered results while maintaining the existing table structure and placeholder rows for operations without data",
+      "reqIds": [
+        "REQ-152"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-summary-cards-on-productiondashboardlivepage-to-calculate-and-display-combined-totals-total-produced-today-total-dispatched-work-in-hand-based-on-currently-applied-container-type-and-size-filters-with-real-time-recalculation-when-filters-change",
+      "title": "Update summary cards on ProductionDashboardLivePage to calculate and display combined totals (Total Produced Today, Total Dispatched, Work in Hand) based on currently applied container type and size filters, with real-time recalculation when filters change",
+      "reqIds": [
+        "REQ-153"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hook-useproductionsummarybytype-in-frontend-src-hooks-usequeries-ts-that-fetches-type-wise-production-summary-from-the-backend-getproductionsummarybytype-query-accepting-date-range-and-optional-size-filter-parameters",
+      "title": "Create React Query hook useProductionSummaryByType in frontend/src/hooks/useQueries.ts that fetches type-wise production summary from the backend getProductionSummaryByType query, accepting date range and optional size filter parameters",
+      "reqIds": [
+        "REQ-154"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-typewiseproductionsummary-component-at-frontend-src-components-typewiseproductionsummary-tsx-that-displays-a-grid-of-cards-showing-aggregated-production-metrics-for-each-container-type-today-s-production-total-completed-dispatched-in-hand-with-premium-card-styling-matching-the-existing-dashboard-design",
+      "title": "Create TypeWiseProductionSummary component at frontend/src/components/TypeWiseProductionSummary.tsx that displays a grid of cards showing aggregated production metrics for each container type (today's production, total completed, dispatched, in hand) with premium card styling matching the existing dashboard design",
+      "reqIds": [
+        "REQ-155"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-typewiseproductionsummary-component-into-productiondashboardlivepage-at-frontend-src-pages-productiondashboardlivepage-tsx-positioning-it-below-the-main-summary-cards-and-above-the-production-charts-section-with-data-filtered-by-currently-selected-container-size",
+      "title": "Integrate TypeWiseProductionSummary component into ProductionDashboardLivePage at frontend/src/pages/ProductionDashboardLivePage.tsx, positioning it below the main summary cards and above the production charts section, with data filtered by currently selected container size",
+      "reqIds": [
+        "REQ-156"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-operationcomparisonchart-component-at-frontend-src-components-operationcomparisonchart-tsx-to-apply-container-type-and-size-filters-to-the-production-data-query-displaying-operation-comparison-for-the-filtered-subset-of-data",
+      "title": "Update OperationComparisonChart component at frontend/src/components/OperationComparisonChart.tsx to apply container type and size filters to the production data query, displaying operation comparison for the filtered subset of data",
+      "reqIds": [
+        "REQ-157"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-productiontrendchart-component-at-frontend-src-components-productiontrendchart-tsx-to-apply-container-type-and-size-filters-to-the-daily-production-data-query-displaying-trend-line-for-the-filtered-subset-of-data-while-maintaining-historical-opening-balance-baseline",
+      "title": "Update ProductionTrendChart component at frontend/src/components/ProductionTrendChart.tsx to apply container type and size filters to the daily production data query, displaying trend line for the filtered subset of data while maintaining historical opening balance baseline",
+      "reqIds": [
+        "REQ-158"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-editproductionreportdialog-component-at-frontend-src-components-editproductionreportdialog-tsx-to-display-container-type-and-container-size-as-read-only-fields-showing-the-current-type-and-size-names-for-the-production-entry-being-edited",
+      "title": "Update EditProductionReportDialog component at frontend/src/components/EditProductionReportDialog.tsx to display container type and container size as read-only fields showing the current type and size names for the production entry being edited",
+      "reqIds": [
+        "REQ-159"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-productionhistorydetailtable-component-at-frontend-src-components-productionhistorydetailtable-tsx-to-add-two-new-columns-displaying-container-type-name-and-container-size-for-each-production-entry-in-the-history-table",
+      "title": "Update ProductionHistoryDetailTable component at frontend/src/components/ProductionHistoryDetailTable.tsx to add two new columns displaying container type name and container size for each production entry in the history table",
+      "reqIds": [
+        "REQ-160"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-liveproductiontable-component-at-frontend-src-components-liveproductiontable-tsx-to-add-columns-displaying-container-type-name-and-container-size-for-each-operation-s-production-data-when-viewing-the-daily-production-table",
+      "title": "Update LiveProductionTable component at frontend/src/components/LiveProductionTable.tsx to add columns displaying container type name and container size for each operation's production data when viewing the daily production table",
+      "reqIds": [
+        "REQ-161"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-ui-components-with-container-type-and-size-dropdowns-are-fully-responsive-and-mobile-optimized-with-touch-friendly-controls-appropriate-spacing-and-readable-text-on-smartphone-screens",
+      "title": "Ensure all UI components with container type and size dropdowns are fully responsive and mobile-optimized with touch-friendly controls, appropriate spacing, and readable text on smartphone screens",
+      "reqIds": [
+        "REQ-162"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-dailyproductionreportform-component-at-frontend-src-components-dailyproductionreportform-tsx-correctly-fetches-container-types-using-usecontainertypes-hook-and-populates-the-container-type-dropdown-with-all-active-container-types-displaying-loading-state-while-fetching-and-showing-a-fallback-message-if-no-container-types-are-available",
+      "title": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container types using useContainerTypes hook and populates the Container Type dropdown with all active container types, displaying loading state while fetching and showing a fallback message if no container types are available",
+      "reqIds": [
+        "REQ-166"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-dailyproductionreportform-component-at-frontend-src-components-dailyproductionreportform-tsx-correctly-fetches-container-sizes-using-usecontainersizes-hook-and-populates-the-container-size-dropdown-with-all-active-container-sizes-displaying-loading-state-while-fetching-and-showing-a-fallback-message-if-no-container-sizes-are-available",
+      "title": "Verify DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx correctly fetches container sizes using useContainerSizes hook and populates the Container Size dropdown with all active container sizes, displaying loading state while fetching and showing a fallback message if no container sizes are available",
+      "reqIds": [
+        "REQ-167"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-dailyproductionreportform-component-at-frontend-src-components-dailyproductionreportform-tsx-enforces-required-validation-for-both-container-type-and-container-size-dropdown-fields-preventing-form-submission-if-either-field-is-not-selected-and-displaying-appropriate-validation-error-messages",
+      "title": "Ensure DailyProductionReportForm component at frontend/src/components/DailyProductionReportForm.tsx enforces required validation for both Container Type and Container Size dropdown fields, preventing form submission if either field is not selected and displaying appropriate validation error messages",
+      "reqIds": [
+        "REQ-168"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-usecontainertypes-and-usecontainersizes-react-query-hooks-in-frontend-src-hooks-usequeries-ts-correctly-call-backend-getcontainertypes-and-getcontainersizes-queries-with-proper-error-handling-displaying-toast-notifications-for-api-errors-and-implementing-automatic-retry-logic-for-failed-requests",
+      "title": "Verify useContainerTypes and useContainerSizes React Query hooks in frontend/src/hooks/useQueries.ts correctly call backend getContainerTypes() and getContainerSizes() queries with proper error handling, displaying toast notifications for API errors and implementing automatic retry logic for failed requests",
+      "reqIds": [
+        "REQ-169"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1222,6 +1406,162 @@
       "summary": "Update Master_Order_Status entry after batch data insertion with values: total_order_quantity=600, total_manufactured=345, total_dispatched=344, ensuring backend calculation shows remaining_to_produce=255 (600-345), finished_stock=1 (345-344), and completion_percentage=57.5 ((345/600)*100)",
       "reqIds": [
         "REQ-129"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-109",
+      "summary": "Create Container_Types master table with fields id, container_type_name, description, is_active and pre-populate with 10 container types",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-110",
+      "summary": "Create Container_Sizes master table with fields id, container_size, length_ft, width_ft, height_ft, is_high_cube, is_active and pre-populate with 5 sizes",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-111",
+      "summary": "Update Daily_Production_Report table to add container_type_id and container_size_id foreign key fields",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-112",
+      "summary": "Update Admin Production Entry Panel to add required dropdown fields for Container Type and Container Size selection",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-113",
+      "summary": "Add Container Type and Container Size filter dropdowns to Production Dashboard with combined totals and type-wise production summary",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-114",
+      "summary": "Implement backward compatibility migration logic to default existing Daily_Production_Report entries to Type=High Cube and Size=40 ft High Cube",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-115",
+      "summary": "Create Container_Types data type in backend/main.mo with fields: id (Nat), container_type_name (Text), description (Text), is_active (Bool), and add stable storage variable containerTypes to store the container types collection",
+      "reqIds": [
+        "REQ-132"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-116",
+      "summary": "Pre-populate containerTypes stable storage with 10 default container type entries: Dry / General Purpose, High Cube, Refrigerated (Reefer), Flat Rack, Open Top, Open Side, Double Door / Tunnel, Tank (ISO Tank), Half Height, Special / Modified, all with is_active set to true and sequential IDs starting from 1",
+      "reqIds": [
+        "REQ-133"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-117",
+      "summary": "Create Container_Sizes data type in backend/main.mo with fields: id (Nat), container_size (Text), length_ft (Nat), width_ft (Nat), height_ft (Nat), is_high_cube (Bool), is_active (Bool), and add stable storage variable containerSizes to store the container sizes collection",
+      "reqIds": [
+        "REQ-134"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-118",
+      "summary": "Pre-populate containerSizes stable storage with 5 default container size entries: 20 ft Standard (length=20, width=8, height=8.5, is_high_cube=false), 20 ft High Cube (length=20, width=8, height=9.5, is_high_cube=true), 40 ft Standard (length=40, width=8, height=8.5, is_high_cube=false), 40 ft High Cube (length=40, width=8, height=9.5, is_high_cube=true), 45 ft High Cube (length=45, width=8, height=9.5, is_high_cube=true), all with is_active set to true and sequential IDs starting from 1",
+      "reqIds": [
+        "REQ-135"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-119",
+      "summary": "Implement backend query function getContainerTypes() in backend/main.mo that returns all active container types with requireAuthenticated() authorization check",
+      "reqIds": [
+        "REQ-136"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-120",
+      "summary": "Implement backend query function getContainerSizes() in backend/main.mo that returns all active container sizes with requireAuthenticated() authorization check",
+      "reqIds": [
+        "REQ-137"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-121",
+      "summary": "Update DailyProductionReport type in backend/main.mo to add two new fields: container_type_id (Nat) and container_size_id (Nat) as foreign keys referencing Container_Types and Container_Sizes respectively",
+      "reqIds": [
+        "REQ-138"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-122",
+      "summary": "Create backend migration logic in backend/migration.mo to add container_type_id and container_size_id fields to all existing DailyProductionReport entries, defaulting container_type_id to 2 (High Cube) and container_size_id to 4 (40 ft High Cube) for backward compatibility",
+      "reqIds": [
+        "REQ-139"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-123",
+      "summary": "Update backend mutation function createDailyProductionReport in backend/main.mo to require container_type_id and container_size_id parameters and validate that the provided IDs exist in their respective master tables before creating the report entry",
+      "reqIds": [
+        "REQ-140"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-124",
+      "summary": "Update backend mutation function updateDailyProductionReportById in backend/main.mo to accept optional container_type_id and container_size_id parameters and validate IDs if provided",
+      "reqIds": [
+        "REQ-141"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-125",
+      "summary": "Update backend query function getDailyProductionReportsByDateRange in backend/main.mo to accept optional container_type_id and container_size_id filter parameters and return only matching entries when filters are provided",
+      "reqIds": [
+        "REQ-142"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-126",
+      "summary": "Create backend query function getProductionSummaryByType in backend/main.mo that accepts date range and optional filters, groups production data by container_type_id, and returns aggregated totals (sum of today_production, total_completed, dispatched, in_hand) for each container type with requireAuthenticated() authorization",
+      "reqIds": [
+        "REQ-143"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-127",
+      "summary": "Implement backend initialization logic in backend/main.mo to automatically populate Container_Types stable storage with 10 default container types on first canister deployment: 1) Dry / General Purpose, 2) High Cube, 3) Refrigerated (Reefer), 4) Flat Rack, 5) Open Top, 6) Open Side, 7) Double Door / Tunnel, 8) Tank (ISO Tank), 9) Half Height, 10) Special / Modified, all with is_active=true and sequential IDs 1-10",
+      "reqIds": [
+        "REQ-163"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-128",
+      "summary": "Implement backend initialization logic in backend/main.mo to automatically populate Container_Sizes stable storage with 4 default container sizes on first canister deployment: 1) 20 ft Standard (length=20, width=8, height=8.5, is_high_cube=false), 2) 40 ft Standard (length=40, width=8, height=8.5, is_high_cube=false), 3) 40 ft High Cube (length=40, width=8, height=9.5, is_high_cube=true), 4) 45 ft High Cube (length=45, width=8, height=9.5, is_high_cube=true), all with is_active=true and sequential IDs 1-4",
+      "reqIds": [
+        "REQ-164"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-129",
+      "summary": "Update backend migration logic in backend/migration.mo to apply default values to existing Daily_Production_Report entries that have NULL or missing container_type_id and container_size_id fields, setting container_type_id=2 (High Cube) and container_size_id=3 (40 ft High Cube) for backward compatibility with existing production data",
+      "reqIds": [
+        "REQ-165"
       ],
       "status": "pending"
     }

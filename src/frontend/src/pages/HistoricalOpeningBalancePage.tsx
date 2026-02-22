@@ -1,4 +1,4 @@
-import { useHistoricalOpeningBalance, useIsCallerAdmin } from '../hooks/useQueries';
+import { useGetHistoricalOpeningBalance, useIsCallerAdmin } from '../hooks/useQueries';
 import HistoricalOpeningBalanceForm from '../components/HistoricalOpeningBalanceForm';
 import HistoricalOpeningBalanceDisplay from '../components/HistoricalOpeningBalanceDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -6,7 +6,7 @@ import { AlertCircle } from 'lucide-react';
 import AccessDeniedScreen from '../components/AccessDeniedScreen';
 
 export default function HistoricalOpeningBalancePage() {
-  const { data: openingBalance, isLoading, error } = useHistoricalOpeningBalance();
+  const { data: openingBalance, isLoading, error } = useGetHistoricalOpeningBalance();
   const { data: isAdmin, isLoading: isAdminLoading } = useIsCallerAdmin();
 
   if (isLoading || isAdminLoading) {

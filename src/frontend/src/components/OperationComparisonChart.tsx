@@ -4,8 +4,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { BarChart3 } from 'lucide-react';
 import { useOperationComparisonData } from '../hooks/useQueries';
 
-export default function OperationComparisonChart() {
-  const { data, isLoading, isError, isRefetching } = useOperationComparisonData();
+interface OperationComparisonChartProps {
+  containerTypeId?: bigint | null;
+  containerSizeId?: bigint | null;
+}
+
+export default function OperationComparisonChart({ containerTypeId, containerSizeId }: OperationComparisonChartProps) {
+  const { data, isLoading, isError, isRefetching } = useOperationComparisonData(containerTypeId, containerSizeId);
 
   if (isLoading) {
     return (
@@ -41,7 +46,7 @@ export default function OperationComparisonChart() {
           <h3 className="text-lg font-semibold">Operation-wise Comparison</h3>
         </div>
         <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-          No operation comparison data available
+          No operation comparison data available for selected filters
         </div>
       </div>
     );

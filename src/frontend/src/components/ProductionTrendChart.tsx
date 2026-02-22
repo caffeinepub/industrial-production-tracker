@@ -2,11 +2,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { useProductionTrendData, useHistoricalOpeningBalance } from '../hooks/useQueries';
+import { useProductionTrendData, useGetHistoricalOpeningBalance } from '../hooks/useQueries';
 
-export default function ProductionTrendChart() {
-  const { data, isLoading, isError, isRefetching } = useProductionTrendData();
-  const { data: openingBalance } = useHistoricalOpeningBalance();
+interface ProductionTrendChartProps {
+  containerTypeId?: bigint | null;
+  containerSizeId?: bigint | null;
+}
+
+export default function ProductionTrendChart({ containerTypeId, containerSizeId }: ProductionTrendChartProps) {
+  const { data, isLoading, isError, isRefetching } = useProductionTrendData(containerTypeId, containerSizeId);
+  const { data: openingBalance } = useGetHistoricalOpeningBalance();
 
   if (isLoading) {
     return (
@@ -34,7 +39,6 @@ export default function ProductionTrendChart() {
     );
   }
 
-  // Prepare chart data with opening balance as first point
   let chartData: Array<{
     date: string;
     totalProduction: number;
@@ -42,7 +46,7 @@ export default function ProductionTrendChart() {
     isOpeningBalance?: boolean;
   }> = data || [];
   
-  if (openingBalance) {
+  if (openingBalance && !containerTypeId && !containerSizeId) {
     const openingBalancePoint = {
       date: openingBalance.openingDate,
       totalProduction: Number(openingBalance.manufacturedBeforeSystem),
@@ -53,7 +57,6 @@ export default function ProductionTrendChart() {
       isOpeningBalance: true,
     };
     
-    // Prepend opening balance to chart data
     chartData = [openingBalancePoint, ...chartData.map(item => ({ ...item, isOpeningBalance: false }))];
   }
 
@@ -65,7 +68,7 @@ export default function ProductionTrendChart() {
           <h3 className="text-lg font-semibold">Production Trend</h3>
         </div>
         <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-          No production trend data available
+          No production trend data available for selected filters
         </div>
       </div>
     );
@@ -92,7 +95,7 @@ export default function ProductionTrendChart() {
       </div>
       <p className="text-sm text-muted-foreground mb-4">
         Daily total production output across all operations
-        {openingBalance && ' (includes historical baseline)'}
+        {openingBalance && !containerTypeId && !containerSizeId && ' (includes historical baseline)'}
       </p>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={formattedData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>

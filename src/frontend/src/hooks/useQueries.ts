@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, ProductionEntry, DispatchEntry, ContainerType, ContainerStatus, Shift, DailyProductionReport, MonthlyProductionTotals, MasterOrderStatus, HistoricalOpeningBalance, DailyReportBatchEntry } from '../backend';
+import type { UserProfile, ProductionEntry, DispatchEntry, ContainerType, ContainerStatus, Shift, DailyProductionReport, MonthlyProductionTotals, MasterOrderStatus, HistoricalOpeningBalance, DailyReportBatchEntry, ContainerTypes, FrontendContainerSizes } from '../backend';
 import { toast } from 'sonner';
 
 export function useGetCallerUserProfile() {
@@ -52,6 +52,38 @@ export function useIsCallerAdmin() {
       return actor.isCallerAdmin();
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+export function useContainerTypes() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<ContainerTypes[]>({
+    queryKey: ['containerTypes'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      const types = await actor.getContainerTypes();
+      return types;
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 5 * 60 * 1000, // 5 minutes - master data doesn't change often
+    retry: 3,
+  });
+}
+
+export function useContainerSizes() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<FrontendContainerSizes[]>({
+    queryKey: ['containerSizes'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      const sizes = await actor.getContainerSizes();
+      return sizes;
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 5 * 60 * 1000, // 5 minutes - master data doesn't change often
+    retry: 3,
   });
 }
 
@@ -222,14 +254,25 @@ export function useGetOperationWorkload() {
   });
 }
 
-export function useGetDailyProductionReportsByDate(date: string) {
+export function useGetDailyProductionReportsByDate(
+  date: string,
+  containerTypeId?: bigint | null,
+  containerSizeId?: bigint | null
+) {
   const { actor, isFetching } = useActor();
 
   return useQuery<DailyProductionReport[]>({
-    queryKey: ['dailyProductionReports', date],
+    queryKey: ['dailyProductionReports', date, containerTypeId?.toString(), containerSizeId?.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getDailyProductionReportsByDate(date);
+      const reports = await actor.getDailyProductionReportsByDate(date);
+      
+      // Apply client-side filtering if needed
+      return reports.filter(report => {
+        const typeMatches = containerTypeId ? report.container_type_id === containerTypeId : true;
+        const sizeMatches = containerSizeId ? report.container_size_id === containerSizeId : true;
+        return typeMatches && sizeMatches;
+      });
     },
     enabled: !!actor && !isFetching && !!date,
   });
@@ -248,14 +291,44 @@ export function useGetDailyProductionReportsByOperation(operationName: string) {
   });
 }
 
-export function useProductionHistoryByDateRange(startDate: string, endDate: string) {
+export function useProductionHistoryByDateRange(
+  startDate: string,
+  endDate: string,
+  containerTypeId?: bigint | null,
+  containerSizeId?: bigint | null
+) {
   const { actor, isFetching } = useActor();
 
   return useQuery<DailyProductionReport[]>({
-    queryKey: ['productionHistoryByDateRange', startDate, endDate],
+    queryKey: ['productionHistoryByDateRange', startDate, endDate, containerTypeId?.toString(), containerSizeId?.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getDailyProductionReportsByDateRange(startDate, endDate);
+      return actor.getDailyProductionReportsByDateRange(
+        startDate,
+        endDate,
+        [containerTypeId ?? null, containerSizeId ?? null]
+      );
+    },
+    enabled: !!actor && !isFetching && !!startDate && !!endDate,
+  });
+}
+
+export function useProductionSummaryByType(
+  startDate: string,
+  endDate: string,
+  containerSizeId?: bigint | null
+) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Array<[bigint, bigint, bigint, bigint, bigint]>>({
+    queryKey: ['productionSummaryByType', startDate, endDate, containerSizeId?.toString()],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getProductionSummaryByType(
+        startDate,
+        endDate,
+        [null, containerSizeId ?? null]
+      );
     },
     enabled: !!actor && !isFetching && !!startDate && !!endDate,
   });
@@ -269,6 +342,8 @@ export function useCreateDailyProductionReport() {
     mutationFn: async (data: {
       date: string;
       operationName: string;
+      containerTypeId: bigint;
+      containerSizeId: bigint;
       todayProduction: bigint;
       totalCompleted: bigint;
       dispatched: bigint;
@@ -278,6 +353,8 @@ export function useCreateDailyProductionReport() {
       return actor.createDailyProductionReport(
         data.date,
         data.operationName,
+        data.containerTypeId,
+        data.containerSizeId,
         data.todayProduction,
         data.totalCompleted,
         data.dispatched,
@@ -286,6 +363,8 @@ export function useCreateDailyProductionReport() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dailyProductionReports'] });
+      queryClient.invalidateQueries({ queryKey: ['productionHistoryByDateRange'] });
+      queryClient.invalidateQueries({ queryKey: ['productionSummaryByType'] });
       toast.success('Production report created successfully');
     },
     onError: (error: Error) => {
@@ -314,6 +393,7 @@ export function useUpdateProductionHistoryEntry() {
       if (!actor) throw new Error('Actor not available');
       return actor.updateDailyProductionReportById(
         data.reportId,
+        [null, null],
         data.todayProduction,
         data.totalCompleted,
         data.dispatched,
@@ -326,6 +406,7 @@ export function useUpdateProductionHistoryEntry() {
       queryClient.invalidateQueries({ queryKey: ['monthlyProductionSummary'] });
       queryClient.invalidateQueries({ queryKey: ['productionTrendData'] });
       queryClient.invalidateQueries({ queryKey: ['operationComparisonData'] });
+      queryClient.invalidateQueries({ queryKey: ['productionSummaryByType'] });
       toast.success('Production report updated successfully');
     },
     onError: (error: Error) => {
@@ -347,6 +428,8 @@ export function useSubmitOrUpdateDailyReport() {
     mutationFn: async (data: {
       date: string;
       operationName: string;
+      containerTypeId: bigint;
+      containerSizeId: bigint;
       todayProduction: bigint;
       totalCompleted: bigint;
       dispatched: bigint;
@@ -356,6 +439,8 @@ export function useSubmitOrUpdateDailyReport() {
       return actor.submitOrUpdateDailyReport(
         data.date,
         data.operationName,
+        data.containerTypeId,
+        data.containerSizeId,
         data.todayProduction,
         data.totalCompleted,
         data.dispatched,
@@ -368,6 +453,7 @@ export function useSubmitOrUpdateDailyReport() {
       queryClient.invalidateQueries({ queryKey: ['productionTrendData'] });
       queryClient.invalidateQueries({ queryKey: ['operationComparisonData'] });
       queryClient.invalidateQueries({ queryKey: ['productionHistoryByDateRange'] });
+      queryClient.invalidateQueries({ queryKey: ['productionSummaryByType'] });
       toast.success('Production report saved successfully');
     },
     onError: (error: Error) => {
@@ -389,13 +475,11 @@ export function useSubmitDailyReportBatch() {
     mutationFn: async (data: { date: string; operations: DailyReportBatchEntry[] }) => {
       if (!actor) throw new Error('Actor not available');
       
-      // Use the backend's batchUpdateDailyProductionReport method
       await actor.batchUpdateDailyProductionReport(data.date, data.operations);
       
       return { count: data.operations.length };
     },
     onSuccess: (result) => {
-      // Invalidate all relevant queries to trigger dashboard refresh
       queryClient.invalidateQueries({ queryKey: ['dailyProductionReports'] });
       queryClient.invalidateQueries({ queryKey: ['monthlyProductionSummary'] });
       queryClient.invalidateQueries({ queryKey: ['productionTrendData'] });
@@ -403,6 +487,7 @@ export function useSubmitDailyReportBatch() {
       queryClient.invalidateQueries({ queryKey: ['productionHistoryByDateRange'] });
       queryClient.invalidateQueries({ queryKey: ['masterOrderStatus'] });
       queryClient.invalidateQueries({ queryKey: ['enhancedMasterOrderStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['productionSummaryByType'] });
       
       toast.success(`Successfully submitted ${result.count} production reports`);
     },
@@ -459,123 +544,11 @@ export function useMonthlyProductionSummary() {
     queryKey: ['monthlyProductionSummary', year, month],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      
-      const data: MonthlyProductionTotals = await actor.getMonthlyProductionTotals(
-        BigInt(year),
-        BigInt(month)
-      );
-
-      const totalProduced = Number(data.totalContainers);
-      const monthlyTarget = 100;
-      const remainingToTarget = Math.max(0, monthlyTarget - totalProduced);
-      const completionPercentage = Math.min(100, (totalProduced / monthlyTarget) * 100);
-      const dailyAverage = currentDay > 0 ? totalProduced / currentDay : 0;
-
+      const data = await actor.getMonthlyProductionTotals(BigInt(year), BigInt(month));
       return {
-        totalProduced,
-        remainingToTarget,
-        completionPercentage,
-        dailyAverage,
-        monthlyTarget,
+        ...data,
+        averagePerDay: currentDay > 0 ? Number(data.totalContainers) / currentDay : 0,
       };
-    },
-    enabled: !!actor && !isFetching,
-    refetchInterval: 30000,
-  });
-}
-
-export function useProductionTrendData() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery({
-    queryKey: ['productionTrendData'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      
-      const allOperations = [
-        'Boxing',
-        'Welding/Finishing',
-        'Rear Wall',
-        'Front Wall',
-        'Side Wall',
-        'Roof',
-        'Rear Door',
-        'Blasting & Primer',
-        'Final Paint',
-        'Gasket',
-        'DLM',
-        'Plywood',
-        'Floor Screw',
-        'Decal',
-        'Data Plate',
-        'Sikha',
-        'Black Paint',
-      ];
-
-      const allReports: DailyProductionReport[] = [];
-      for (const operation of allOperations) {
-        const reports = await actor.getDailyProductionReportsByOperation(operation);
-        allReports.push(...reports);
-      }
-
-      const dateMap = new Map<string, number>();
-      allReports.forEach((report) => {
-        if (report.date) {
-          const currentTotal = dateMap.get(report.date) || 0;
-          dateMap.set(report.date, currentTotal + Number(report.todayProduction));
-        }
-      });
-
-      const trendData = Array.from(dateMap.entries())
-        .map(([date, totalProduction]) => ({ date, totalProduction }))
-        .sort((a, b) => a.date.localeCompare(b.date));
-
-      return trendData;
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useOperationComparisonData() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery({
-    queryKey: ['operationComparisonData'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-
-      const allOperations = [
-        'Boxing',
-        'Welding/Finishing',
-        'Rear Wall',
-        'Front Wall',
-        'Side Wall',
-        'Roof',
-        'Rear Door',
-        'Blasting & Primer',
-        'Final Paint',
-        'Gasket',
-        'DLM',
-        'Plywood',
-        'Floor Screw',
-        'Decal',
-        'Data Plate',
-        'Sikha',
-        'Black Paint',
-      ];
-
-      const comparisonData = await Promise.all(
-        allOperations.map(async (operation) => {
-          const reports = await actor.getDailyProductionReportsByOperation(operation);
-          const latestReport = reports.length > 0 ? reports[reports.length - 1] : null;
-          return {
-            operation,
-            totalCompleted: latestReport ? Number(latestReport.totalCompleted) : 0,
-          };
-        })
-      );
-
-      return comparisonData;
     },
     enabled: !!actor && !isFetching,
   });
@@ -591,6 +564,7 @@ export function useGetMasterOrderStatus() {
       return actor.getMasterOrderStatus();
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 30000,
   });
 }
 
@@ -604,10 +578,11 @@ export function useGetEnhancedMasterOrderStatus() {
       return actor.getEnhancedMasterOrderStatus();
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 30000,
   });
 }
 
-export function useHistoricalOpeningBalance() {
+export function useGetHistoricalOpeningBalance() {
   const { actor, isFetching } = useActor();
 
   return useQuery<HistoricalOpeningBalance | null>({
@@ -619,6 +594,9 @@ export function useHistoricalOpeningBalance() {
     enabled: !!actor && !isFetching,
   });
 }
+
+// Alias for backward compatibility
+export const useHistoricalOpeningBalance = useGetHistoricalOpeningBalance;
 
 export function useCreateHistoricalOpeningBalance() {
   const { actor } = useActor();
@@ -648,10 +626,96 @@ export function useCreateHistoricalOpeningBalance() {
     onError: (error: Error) => {
       const errorMessage = error.message || 'Unknown error';
       if (errorMessage.includes('Unauthorized') || errorMessage.includes('Admin role required')) {
-        toast.error('Access denied: Only admins can create opening balance');
+        toast.error('Access denied: Only admins can create historical opening balance');
+      } else if (errorMessage.includes('already exists')) {
+        toast.error('Historical opening balance already exists');
       } else {
         toast.error(`Failed to create opening balance: ${errorMessage}`);
       }
     },
+  });
+}
+
+// Production Trend Data Hook
+export function useProductionTrendData(
+  containerTypeId?: bigint | null,
+  containerSizeId?: bigint | null
+) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Array<{ date: string; totalProduction: number }>>({
+    queryKey: ['productionTrendData', containerTypeId?.toString(), containerSizeId?.toString()],
+    queryFn: async () => {
+      if (!actor) return [];
+      
+      // Get last 30 days of data
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      
+      const formatDate = (date: Date) => date.toISOString().split('T')[0];
+      
+      const reports = await actor.getDailyProductionReportsByDateRange(
+        formatDate(startDate),
+        formatDate(endDate),
+        [containerTypeId ?? null, containerSizeId ?? null]
+      );
+      
+      // Group by date and sum totalCompleted
+      const dateMap = new Map<string, number>();
+      
+      reports.forEach(report => {
+        if (report.date) {
+          const current = dateMap.get(report.date) || 0;
+          dateMap.set(report.date, current + Number(report.totalCompleted));
+        }
+      });
+      
+      // Convert to array and sort by date
+      const result = Array.from(dateMap.entries())
+        .map(([date, totalProduction]) => ({ date, totalProduction }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+      
+      return result;
+    },
+    enabled: !!actor && !isFetching,
+    refetchInterval: 60000, // Refetch every minute
+  });
+}
+
+// Operation Comparison Data Hook
+export function useOperationComparisonData(
+  containerTypeId?: bigint | null,
+  containerSizeId?: bigint | null
+) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Array<{ operation: string; production: number }>>({
+    queryKey: ['operationComparisonData', containerTypeId?.toString(), containerSizeId?.toString()],
+    queryFn: async () => {
+      if (!actor) return [];
+      
+      // Get current date
+      const today = new Date().toISOString().split('T')[0];
+      
+      const reports = await actor.getDailyProductionReportsByDate(today);
+      
+      // Filter by container type and size if provided
+      const filteredReports = reports.filter(report => {
+        const typeMatches = containerTypeId ? report.container_type_id === containerTypeId : true;
+        const sizeMatches = containerSizeId ? report.container_size_id === containerSizeId : true;
+        return typeMatches && sizeMatches;
+      });
+      
+      // Map to chart data format
+      const result = filteredReports.map(report => ({
+        operation: report.operationName,
+        production: Number(report.totalCompleted),
+      }));
+      
+      return result;
+    },
+    enabled: !!actor && !isFetching,
+    refetchInterval: 60000, // Refetch every minute
   });
 }

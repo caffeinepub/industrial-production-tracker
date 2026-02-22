@@ -1,16 +1,9 @@
+import { useGetDailyProductionReportsByDate, useContainerTypes, useContainerSizes } from '../hooks/useQueries';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, CheckCircle2 } from 'lucide-react';
-import type { DailyProductionReport } from '../backend';
+import { CheckCircle2, Circle } from 'lucide-react';
+import { useMemo } from 'react';
 
-interface LiveProductionTableProps {
-  reports: DailyProductionReport[];
-  isLoading: boolean;
-  date: string;
-}
-
-// All 17 operations in the correct order
 const ALL_OPERATIONS = [
   'Boxing',
   'Welding/Finishing',
@@ -31,111 +24,96 @@ const ALL_OPERATIONS = [
   'Black Paint',
 ];
 
-export default function LiveProductionTable({ reports, isLoading, date }: LiveProductionTableProps) {
-  const formattedDate = new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+interface LiveProductionTableProps {
+  date: string;
+  containerTypeId?: bigint | null;
+  containerSizeId?: bigint | null;
+}
 
-  // Create a map of operation name to report for quick lookup
-  const reportMap = new Map<string, DailyProductionReport>();
-  reports.forEach(report => {
-    reportMap.set(report.operationName, report);
-  });
+export default function LiveProductionTable({ date, containerTypeId, containerSizeId }: LiveProductionTableProps) {
+  const { data: reports, isLoading } = useGetDailyProductionReportsByDate(date, containerTypeId, containerSizeId);
+  const { data: containerTypes } = useContainerTypes();
+  const { data: containerSizes } = useContainerSizes();
 
-  // Build ordered list of reports, showing all 17 operations
-  const orderedReports = ALL_OPERATIONS.map(operationName => {
-    const report = reportMap.get(operationName);
-    if (report) {
-      return report;
-    }
-    // Return placeholder for missing operations
-    return {
-      id: BigInt(0),
-      date,
-      operationName,
-      todayProduction: BigInt(0),
-      totalCompleted: BigInt(0),
-      dispatched: BigInt(0),
-      inHand: BigInt(0),
-    } as DailyProductionReport;
-  });
+  const typeMap = useMemo(
+    () => new Map(containerTypes?.map((type) => [type.id, type.container_type_name])),
+    [containerTypes]
+  );
+  const sizeMap = useMemo(
+    () => new Map(containerSizes?.map((size) => [size.id, size.container_size])),
+    [containerSizes]
+  );
+
+  const tableData = useMemo(() => {
+    const reportMap = new Map(reports?.map((r) => [r.operationName, r]));
+
+    return ALL_OPERATIONS.map((operation) => {
+      const report = reportMap.get(operation);
+      return {
+        operation,
+        hasData: !!report,
+        containerType: report ? typeMap.get(report.container_type_id) || '-' : containerTypeId ? typeMap.get(containerTypeId) || 'All' : 'All',
+        containerSize: report ? sizeMap.get(report.container_size_id) || '-' : containerSizeId ? sizeMap.get(containerSizeId) || 'All' : 'All',
+        todayProduction: report ? Number(report.todayProduction) : 0,
+        totalCompleted: report ? Number(report.totalCompleted) : 0,
+        dispatched: report ? Number(report.dispatched) : 0,
+        inHand: report ? Number(report.inHand) : 0,
+      };
+    });
+  }, [reports, containerTypeId, containerSizeId, typeMap, sizeMap]);
+
+  if (isLoading) {
+    return (
+      <div className="glass-card metallic-border rounded-lg p-6">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
 
   return (
-    <Card className="glass-card metallic-border">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary" />
-            Daily Production by Operation
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-muted-foreground">
-              {formattedDate}
-            </div>
-            {reports.length === 17 && (
-              <CheckCircle2 className="h-5 w-5 text-success" />
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+    <div className="glass-card metallic-border rounded-lg p-6">
+      <h2 className="text-2xl font-bold mb-4">Production Details - {date}</h2>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12"></TableHead>
+              <TableHead>Operation</TableHead>
+              <TableHead>Container Type</TableHead>
+              <TableHead>Container Size</TableHead>
+              <TableHead className="text-right">Today's Production</TableHead>
+              <TableHead className="text-right">Total Completed</TableHead>
+              <TableHead className="text-right">Dispatched</TableHead>
+              <TableHead className="text-right">In Hand</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tableData.map((row, index) => (
+              <TableRow
+                key={row.operation}
+                className={`${row.hasData ? 'animate-fade-in' : 'opacity-50'} hover:bg-muted/50 transition-colors`}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <TableCell>
+                  {row.hasData ? (
+                    <CheckCircle2 className="h-5 w-5 text-success" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </TableCell>
+                <TableCell className="font-medium">{row.operation}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{row.containerType}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{row.containerSize}</TableCell>
+                <TableCell className="text-right font-semibold text-primary">{row.todayProduction}</TableCell>
+                <TableCell className="text-right">{row.totalCompleted}</TableCell>
+                <TableCell className="text-right text-success">{row.dispatched}</TableCell>
+                <TableCell className="text-right text-warning">{row.inHand}</TableCell>
+              </TableRow>
             ))}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[200px]">Operation Name</TableHead>
-                  <TableHead className="text-right">Today's Production</TableHead>
-                  <TableHead className="text-right">Total Completed</TableHead>
-                  <TableHead className="text-right">Dispatched</TableHead>
-                  <TableHead className="text-right">In Hand</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orderedReports.map((report, index) => {
-                  const hasData = Number(report.todayProduction) > 0 || Number(report.totalCompleted) > 0;
-                  return (
-                    <TableRow 
-                      key={`${report.operationName}-${index}`} 
-                      className={`hover:bg-muted/50 transition-colors ${!hasData ? 'opacity-50' : ''}`}
-                    >
-                      <TableCell className="font-medium">{report.operationName}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={`inline-flex items-center justify-center min-w-[3rem] px-2 py-1 rounded-md font-semibold animate-fade-in ${
-                          Number(report.todayProduction) > 0 
-                            ? 'bg-primary/10 text-primary' 
-                            : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {Number(report.todayProduction)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">{Number(report.totalCompleted)}</TableCell>
-                      <TableCell className="text-right">{Number(report.dispatched)}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={`inline-flex items-center justify-center min-w-[3rem] px-2 py-1 rounded-md font-medium ${
-                          Number(report.inHand) > 0 
-                            ? 'bg-accent' 
-                            : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {Number(report.inHand)}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }

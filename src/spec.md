@@ -1,13 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Insert historical production data for date 2026-02-21 and update master order status to reflect current manufacturing progress.
+**Goal:** Seed container types and sizes master data with backend initialization and fix empty dropdowns in the daily production report form.
 
 **Planned changes:**
-- Create backend mutation function `batchUpdateDailyProductionReport` that accepts date and array of operation data, auto-calculates in_hand values, and performs INSERT or UPDATE based on record existence
-- Execute batch insertion for date 2026-02-21 with all 17 operations using specified production data (Boxing: today=5/total=400/dispatch=344, Welding/Finishing: today=4/total=399/dispatch=344, etc.)
-- Update Master_Order_Status entry with total_order_quantity=600, total_manufactured=345, total_dispatched=344
-- Ensure ProductionDashboardLivePage automatically refreshes and displays updated production data for 2026-02-21
-- Ensure LiveProductionTable correctly displays all 17 operations with production data when date 2026-02-21 is selected
+- Implement backend initialization logic to auto-populate Container_Types with 10 default container types (Dry/General Purpose, High Cube, Refrigerated, Flat Rack, Open Top, Open Side, Double Door/Tunnel, Tank, Half Height, Special/Modified) on first canister deployment
+- Implement backend initialization logic to auto-populate Container_Sizes with 4 default sizes (20ft Standard, 40ft Standard, 40ft High Cube, 45ft High Cube) with correct dimensions on first canister deployment
+- Update backend migration logic to apply default values (container_type_id=2, container_size_id=3) to existing Daily_Production_Report entries with NULL fields
+- Verify DailyProductionReportForm component correctly fetches and displays container types and sizes in dropdowns with loading states and fallback messages
+- Ensure both Container Type and Container Size fields are required with validation error messages
+- Verify useContainerTypes and useContainerSizes hooks correctly call backend queries with proper error handling and retry logic
 
-**User-visible outcome:** Administrators can view historical production data for date 2026-02-21 in the dashboard, with all 17 operations showing correct today's production, totals, dispatch, and in-hand values. Master order progress metrics display total_manufactured=345 and total_dispatched=344 with accurate calculated metrics (remaining=255, finished_stock=1, completion=57.5%).
+**User-visible outcome:** Users can select from pre-populated Container Type and Container Size dropdowns when creating daily production reports, with proper validation preventing submission of incomplete forms.

@@ -1,282 +1,98 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
-import List "mo:core/List";
-import Float "mo:core/Float";
 
 module {
-  // Types copied from main actor state
-  type ContainerType = {
-    #fullContainer;
-    #flatPack;
-    #insulated;
+  type ContainerTypes = {
+    id : Nat;
+    container_type_name : Text;
+    description : Text;
+    is_active : Bool;
   };
 
-  type ContainerStatus = {
-    #readyForDispatch;
-    #pendingOperations;
-    #underTesting;
-  };
-
-  type Shift = {
-    shiftId : Nat;
-    name : Text;
-    containerQty : Nat;
-  };
-
-  type ProductionEntry = {
-    entryId : Nat;
-    containerType : ContainerType;
-    shiftDetail : Shift;
-    totalQty : Nat;
-    status : ContainerStatus;
-    statusTime : Int;
-    createdAt : Int;
-    modifiedAt : Int;
-  };
-
-  type DispatchEntry = {
-    dispatchId : Nat;
-    containerType : ContainerType;
-    quantity : Nat;
-    dispatchDate : Int;
-    destination : Text;
-    deliveryStatus : Text;
-    createdAt : Int;
+  type ContainerSizes = {
+    id : Nat;
+    container_size : Text;
+    length_ft : Nat;
+    width_ft : Nat;
+    height_ft : Nat;
+    is_high_cube : Bool;
+    is_active : Bool;
   };
 
   type DailyProductionReport = {
     id : Nat;
     date : Text;
     operationName : Text;
+    container_type_id : Nat;
+    container_size_id : Nat;
     todayProduction : Nat;
     totalCompleted : Nat;
     dispatched : Nat;
     inHand : Nat;
   };
 
-  type MasterOrderStatus = {
-    id : Nat;
-    orderName : Text;
-    totalOrderQuantity : Nat;
-    totalManufactured : Nat;
-    totalDispatched : Nat;
-  };
-
-  type EnhancedMasterOrderStatus = {
-    id : Nat;
-    orderName : Text;
-    totalOrderQuantity : Nat;
-    totalManufactured : Nat;
-    totalDispatched : Nat;
-    remainingToProduce : Nat;
-    finishedStock : Nat;
-    completionPercentage : Float;
-  };
-
-  type HistoricalOpeningBalance = {
-    id : Nat;
-    openingDate : Text;
-    manufacturedBeforeSystem : Nat;
-    dispatchedBeforeSystem : Nat;
-    isLocked : Bool;
-    entryType : Text;
-    manufacturingStartDate : Text;
-    systemGoLiveDate : Text;
-  };
-
   type OldActor = {
-    nextReportId : Nat;
-    masterOrderStatus : MasterOrderStatus;
+    containerTypes : Map.Map<Nat, ContainerTypes>;
+    containerSizes : Map.Map<Nat, ContainerSizes>;
     dailyProductionReports : Map.Map<Nat, DailyProductionReport>;
-    productionEntries : Map.Map<Nat, ProductionEntry>;
-    dispatchEntries : Map.Map<Nat, DispatchEntry>;
-    historicalOpeningBalance : ?HistoricalOpeningBalance;
   };
 
   type NewActor = {
-    nextReportId : Nat;
-    masterOrderStatus : MasterOrderStatus;
+    containerTypes : Map.Map<Nat, ContainerTypes>;
+    containerSizes : Map.Map<Nat, ContainerSizes>;
     dailyProductionReports : Map.Map<Nat, DailyProductionReport>;
-    productionEntries : Map.Map<Nat, ProductionEntry>;
-    dispatchEntries : Map.Map<Nat, DispatchEntry>;
-    historicalOpeningBalance : ?HistoricalOpeningBalance;
   };
 
   public func run(old : OldActor) : NewActor {
-    let updatedDailyReports = old.dailyProductionReports;
-
-    let newReports = [
-      {
-        id = old.nextReportId;
-        date = "2026-02-21";
-        operationName = "Boxing";
-        todayProduction = 5;
-        totalCompleted = 400;
-        dispatched = 344;
-        inHand = 56;
-      },
-      {
-        id = old.nextReportId + 1;
-        date = "2026-02-21";
-        operationName = "Welding/Finishing";
-        todayProduction = 4;
-        totalCompleted = 399;
-        dispatched = 344;
-        inHand = 55;
-      },
-      {
-        id = old.nextReportId + 2;
-        date = "2026-02-21";
-        operationName = "Rear Wall";
-        todayProduction = 2;
-        totalCompleted = 403;
-        dispatched = 344;
-        inHand = 59;
-      },
-      {
-        id = old.nextReportId + 3;
-        date = "2026-02-21";
-        operationName = "Front Wall";
-        todayProduction = 5;
-        totalCompleted = 422;
-        dispatched = 344;
-        inHand = 78;
-      },
-      {
-        id = old.nextReportId + 4;
-        date = "2026-02-21";
-        operationName = "Side Wall";
-        todayProduction = 8;
-        totalCompleted = 439;
-        dispatched = 344;
-        inHand = 95;
-      },
-      {
-        id = old.nextReportId + 5;
-        date = "2026-02-21";
-        operationName = "Roof";
-        todayProduction = 0;
-        totalCompleted = 427;
-        dispatched = 344;
-        inHand = 83;
-      },
-      {
-        id = old.nextReportId + 6;
-        date = "2026-02-21";
-        operationName = "Rear Door";
-        todayProduction = 10;
-        totalCompleted = 420;
-        dispatched = 344;
-        inHand = 76;
-      },
-      {
-        id = old.nextReportId + 7;
-        date = "2026-02-21";
-        operationName = "Blasting & Primer";
-        todayProduction = 4;
-        totalCompleted = 367;
-        dispatched = 344;
-        inHand = 23;
-      },
-      {
-        id = old.nextReportId + 8;
-        date = "2026-02-21";
-        operationName = "Final Paint";
-        todayProduction = 3;
-        totalCompleted = 359;
-        dispatched = 344;
-        inHand = 15;
-      },
-      {
-        id = old.nextReportId + 9;
-        date = "2026-02-21";
-        operationName = "Gasket";
-        todayProduction = 5;
-        totalCompleted = 352;
-        dispatched = 344;
-        inHand = 8;
-      },
-      {
-        id = old.nextReportId + 10;
-        date = "2026-02-21";
-        operationName = "DLM";
-        todayProduction = 5;
-        totalCompleted = 352;
-        dispatched = 344;
-        inHand = 8;
-      },
-      {
-        id = old.nextReportId + 11;
-        date = "2026-02-21";
-        operationName = "Plywood";
-        todayProduction = 5;
-        totalCompleted = 351;
-        dispatched = 344;
-        inHand = 7;
-      },
-      {
-        id = old.nextReportId + 12;
-        date = "2026-02-21";
-        operationName = "Floor Screw";
-        todayProduction = 5;
-        totalCompleted = 350;
-        dispatched = 344;
-        inHand = 6;
-      },
-      {
-        id = old.nextReportId + 13;
-        date = "2026-02-21";
-        operationName = "Decal";
-        todayProduction = 5;
-        totalCompleted = 352;
-        dispatched = 344;
-        inHand = 8;
-      },
-      {
-        id = old.nextReportId + 14;
-        date = "2026-02-21";
-        operationName = "Data Plate";
-        todayProduction = 5;
-        totalCompleted = 352;
-        dispatched = 344;
-        inHand = 8;
-      },
-      {
-        id = old.nextReportId + 15;
-        date = "2026-02-21";
-        operationName = "Sikha";
-        todayProduction = 4;
-        totalCompleted = 346;
-        dispatched = 344;
-        inHand = 2;
-      },
-      {
-        id = old.nextReportId + 16;
-        date = "2026-02-21";
-        operationName = "Black Paint";
-        todayProduction = 1;
-        totalCompleted = 345;
-        dispatched = 344;
-        inHand = 1;
-      },
-    ];
-
-    for (report in newReports.values()) {
-      updatedDailyReports.add(report.id, report);
+    // Migrate container types with defaults
+    let containerTypes = if (old.containerTypes.size() == 0) {
+      Map.fromIter<Nat, ContainerTypes>(
+        [
+          (1, { id = 1; container_type_name = "Dry / General Purpose"; description = "Standard containers for general cargo"; is_active = true }),
+          (2, { id = 2; container_type_name = "High Cube"; description = "Taller containers for larger cargo"; is_active = true }),
+          (3, { id = 3; container_type_name = "Refrigerated (Reefer)"; description = "Temperature-controlled containers"; is_active = true }),
+          (4, { id = 4; container_type_name = "Flat Rack"; description = "Containers with collapsible sides"; is_active = true }),
+          (5, { id = 5; container_type_name = "Open Top"; description = "Containers with removable/top covers"; is_active = true }),
+          (6, { id = 6; container_type_name = "Open Side"; description = "Containers with convertible sides"; is_active = true }),
+          (7, { id = 7; container_type_name = "Double Door / Tunnel"; description = "Containers with doors on both ends"; is_active = true }),
+          (8, { id = 8; container_type_name = "Tank (ISO Tank)"; description = "Containers for liquid cargo"; is_active = true }),
+          (9, { id = 9; container_type_name = "Half Height"; description = "Shorter containers for specific cargo"; is_active = true }),
+          (10, { id = 10; container_type_name = "Special / Modified"; description = "Custom containers for specialized needs"; is_active = true }),
+        ].values(),
+      );
+    } else {
+      old.containerTypes;
     };
 
-    let updatedMasterOrderStatus : MasterOrderStatus = {
-      old.masterOrderStatus with
-      totalOrderQuantity = 600;
-      totalManufactured = 345;
-      totalDispatched = 344;
+    // Use persistent containerSizes or defaults if empty
+    let containerSizes = if (old.containerSizes.size() == 0) {
+      Map.fromIter<Nat, ContainerSizes>(
+        [
+          (1, { id = 1; container_size = "20 ft Standard"; length_ft = 20; width_ft = 8; height_ft = 8; is_high_cube = false; is_active = true }),
+          (2, { id = 2; container_size = "40 ft Standard"; length_ft = 40; width_ft = 8; height_ft = 8; is_high_cube = false; is_active = true }),
+          (3, { id = 3; container_size = "40 ft High Cube"; length_ft = 40; width_ft = 8; height_ft = 9; is_high_cube = true; is_active = true }),
+          (4, { id = 4; container_size = "45 ft High Cube"; length_ft = 45; width_ft = 8; height_ft = 9; is_high_cube = true; is_active = true }),
+        ].values(),
+      );
+    } else {
+      old.containerSizes;
     };
+
+    // Apply defaults to daily production reports
+    let dailyProductionReports = old.dailyProductionReports.map<Nat, DailyProductionReport, DailyProductionReport>(
+      func(_id, report) {
+        {
+          report with
+          container_type_id = if (report.container_type_id == 0) { 2 } else { report.container_type_id };
+          container_size_id = if (report.container_size_id == 0) { 3 } else { report.container_size_id };
+        };
+      }
+    );
 
     {
-      old with
-      dailyProductionReports = updatedDailyReports;
-      masterOrderStatus = updatedMasterOrderStatus;
-      nextReportId = old.nextReportId + 17;
+      containerTypes;
+      containerSizes;
+      dailyProductionReports;
     };
   };
 };

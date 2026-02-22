@@ -41,10 +41,27 @@ export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'department' : IDL.Text,
 });
+export const FrontendContainerSizes = IDL.Record({
+  'id' : IDL.Nat,
+  'container_size' : IDL.Text,
+  'is_high_cube' : IDL.Bool,
+  'length_ft' : IDL.Nat,
+  'height_ft' : IDL.Float64,
+  'width_ft' : IDL.Nat,
+  'is_active' : IDL.Bool,
+});
+export const ContainerTypes = IDL.Record({
+  'id' : IDL.Nat,
+  'description' : IDL.Text,
+  'container_type_name' : IDL.Text,
+  'is_active' : IDL.Bool,
+});
 export const DailyProductionReport = IDL.Record({
   'id' : IDL.Nat,
+  'container_type_id' : IDL.Nat,
   'todayProduction' : IDL.Nat,
   'totalCompleted' : IDL.Nat,
+  'container_size_id' : IDL.Nat,
   'date' : IDL.Text,
   'operationName' : IDL.Text,
   'dispatched' : IDL.Nat,
@@ -115,7 +132,16 @@ export const idlService = IDL.Service({
       [],
     ),
   'createDailyProductionReport' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+      ],
       [IDL.Nat],
       [],
     ),
@@ -136,11 +162,17 @@ export const idlService = IDL.Service({
     ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getContainerSizes' : IDL.Func(
+      [],
+      [IDL.Vec(FrontendContainerSizes)],
+      ['query'],
+    ),
   'getContainerStatuses' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(ContainerType, ContainerStatus))],
       ['query'],
     ),
+  'getContainerTypes' : IDL.Func([], [IDL.Vec(ContainerTypes)], ['query']),
   'getDailyProductionByStatus' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(ContainerType, ContainerStatus, IDL.Nat))],
@@ -152,7 +184,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getDailyProductionReportsByDateRange' : IDL.Func(
-      [IDL.Text, IDL.Text],
+      [IDL.Text, IDL.Text, IDL.Tuple(IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat))],
       [IDL.Vec(DailyProductionReport)],
       ['query'],
     ),
@@ -192,16 +224,31 @@ export const idlService = IDL.Service({
       [IDL.Vec(OperationStatus)],
       ['query'],
     ),
+  'getProductionSummaryByType' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Tuple(IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat))],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat))],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'initializeContainerTypesAndSizes' : IDL.Func([], [], []),
   'initializeProductionReports' : IDL.Func([], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitOrUpdateDailyReport' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+      ],
       [IDL.Nat],
       [],
     ),
@@ -211,7 +258,14 @@ export const idlService = IDL.Service({
       [],
     ),
   'updateDailyProductionReportById' : IDL.Func(
-      [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+      [
+        IDL.Nat,
+        IDL.Tuple(IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)),
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+      ],
       [],
       [],
     ),
@@ -256,10 +310,27 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'department' : IDL.Text,
   });
+  const FrontendContainerSizes = IDL.Record({
+    'id' : IDL.Nat,
+    'container_size' : IDL.Text,
+    'is_high_cube' : IDL.Bool,
+    'length_ft' : IDL.Nat,
+    'height_ft' : IDL.Float64,
+    'width_ft' : IDL.Nat,
+    'is_active' : IDL.Bool,
+  });
+  const ContainerTypes = IDL.Record({
+    'id' : IDL.Nat,
+    'description' : IDL.Text,
+    'container_type_name' : IDL.Text,
+    'is_active' : IDL.Bool,
+  });
   const DailyProductionReport = IDL.Record({
     'id' : IDL.Nat,
+    'container_type_id' : IDL.Nat,
     'todayProduction' : IDL.Nat,
     'totalCompleted' : IDL.Nat,
+    'container_size_id' : IDL.Nat,
     'date' : IDL.Text,
     'operationName' : IDL.Text,
     'dispatched' : IDL.Nat,
@@ -330,7 +401,16 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'createDailyProductionReport' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+        ],
         [IDL.Nat],
         [],
       ),
@@ -351,11 +431,17 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getContainerSizes' : IDL.Func(
+        [],
+        [IDL.Vec(FrontendContainerSizes)],
+        ['query'],
+      ),
     'getContainerStatuses' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(ContainerType, ContainerStatus))],
         ['query'],
       ),
+    'getContainerTypes' : IDL.Func([], [IDL.Vec(ContainerTypes)], ['query']),
     'getDailyProductionByStatus' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(ContainerType, ContainerStatus, IDL.Nat))],
@@ -367,7 +453,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getDailyProductionReportsByDateRange' : IDL.Func(
-        [IDL.Text, IDL.Text],
+        [IDL.Text, IDL.Text, IDL.Tuple(IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat))],
         [IDL.Vec(DailyProductionReport)],
         ['query'],
       ),
@@ -407,16 +493,31 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(OperationStatus)],
         ['query'],
       ),
+    'getProductionSummaryByType' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Tuple(IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat))],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat))],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'initializeContainerTypesAndSizes' : IDL.Func([], [], []),
     'initializeProductionReports' : IDL.Func([], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitOrUpdateDailyReport' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+        ],
         [IDL.Nat],
         [],
       ),
@@ -426,7 +527,14 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateDailyProductionReportById' : IDL.Func(
-        [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+        [
+          IDL.Nat,
+          IDL.Tuple(IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)),
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+        ],
         [],
         [],
       ),
